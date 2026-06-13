@@ -1,0 +1,247 @@
+diff --git a/index.html b/index.html
+index 1b6314b..afd9bcd 100644
+--- a/index.html
++++ b/index.html
+@@ -741,7 +741,7 @@
+ 
+ <script>
+ /* ===== Matchday — World Cup 2026 staff pool · full 104-match build · v2: knockout predictions · WC26 official theme (black/gold + host tricolor) ===== */
+-const PASS_HASH = "b2f167a0d3a56ad1e62e2fbcff2258f3fd5b2548f6c69e8756c169b5893db920"; // organizer code, hashed — the code itself is never in this file
++/* Organizer access code: verified server-side by the org_check RPC — no hash ships in this file anymore */
+ const ORG_TTL = 60*60*1000; // organizer unlock auto-expires after 60 minutes
+ const CHAMP_PTS=25;                       // champion bonus
+ const CHAMP_LOCK="2026-06-18T16:00:00Z";  // champion picks lock: Thu 18 Jun, 7:00 PM Doha (first Matchday 2 kickoff)
+@@ -867,6 +867,7 @@ const RAW=[
+  ["k32","FINAL","TBD","TBD","2026-07-19T19:00:00Z","","final",1]
+ ];
+ const FIXTURES = RAW.map(r=>({id:r[0],round:r[1],home:T(r[2]),away:T(r[3]),ko:r[4],v:r[5]||"",tag:r[6]||null,kn:!!r[7]}));
++const FXID={};FIXTURES.forEach(f=>FXID[f.id]=f);
+ const GROUP_TOTAL = FIXTURES.filter(f=>!f.kn).length;
+ const FIXBYID={};FIXTURES.forEach(f=>FIXBYID[f.id]=f);
+ const ARAB = new Set(["Qatar","Morocco","Egypt","Tunisia","Saudi Arabia","Algeria","Iraq","Jordan"]);
+@@ -943,6 +944,57 @@ async function slist(pre,sh){
+   try{const r=await fetch(SUPABASE_URL+"/rest/v1/kv?key=like."+encodeURIComponent(pre)+"*&select=key",{headers:SBH});
+     const j=await r.json();return Array.isArray(j)?j.map(x=>x.key):[];}catch(e){return [];}
+ }
++/* ===== RPC bridge: ALL shared writes go through server-side functions =====
++   kv is read-only to the browser since sql/protect.sql. Kickoff locks and
++   PINs are enforced by Postgres on the database clock — console tricks and
++   direct REST calls bounce off the wall, for everyone equally. */
++async function rpc(fn,args){
++  try{const r=await fetch(SUPABASE_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:SBH,body:JSON.stringify(args||{})});
++    let j=null;try{j=await r.json();}catch(e){}
++    return {ok:r.ok,j:j,err:(!r.ok&&j&&(j.message||j.hint))||null};
++  }catch(e){return {ok:false,j:null,err:"network"};}
++}
++async function savePicksRPC(){
++  if(!state.meSlug||!state.player)return false;
++  const pin=lsGet("wc:pin")||"";
++  if(!/^\d{4}$/.test(pin)){needPin();return false;}
++  const res=await rpc("save_picks",{p_slug:state.meSlug,p_pin:pin,p_payload:state.player});
++  if(res.ok&&res.j){bustStandings();reconcilePicks(res.j);return true;}
++  if(res.err==="wrong_pin"){lsDel("wc:pin");needPin();return false;}
++  return false;
++}
++/* The server's answer is canonical: any pick it kept sealed snaps back here */
++function reconcilePicks(srv){
++  if(!srv||!state.player)return;
++  const sp=srv.predictions||{},lp=state.player.predictions||(state.player.predictions={});
++  let sealed=0;
++  const ids={};Object.keys(lp).forEach(k=>ids[k]=1);Object.keys(sp).forEach(k=>ids[k]=1);
++  for(const id in ids){
++    const f=FXID[id];if(!f||!lockedM(f))continue;
++    if(JSON.stringify(lp[id]||null)!==JSON.stringify(sp[id]||null)){
++      if(sp[id])lp[id]=sp[id];else delete lp[id];
++      syncPickRow(id);sealed++;
++    }
++  }
++  if(locked(CHAMP_LOCK)&&srv.champ!==state.player.champ)state.player.champ=srv.champ;
++  if(sealed){syncProgress();updateChip();toast("🔒 "+sealed+" pick"+(sealed>1?"s":"")+" had already kicked off — kept as sealed");}
++}
++function needPin(){
++  toast("Enter your 4-digit PIN to keep your picks saving");
++  const ig=document.getElementById("j-ig");if(ig&&state.meSlug)ig.value=state.meSlug;
++  go("join");
++}
++/* Organizer writes: access code rides along, verified in Postgres each call */
++async function orgRPC(op,key,obj){
++  if(key&&(key==="wc:results"||key==="wc:kteams"||key.indexOf("wc:player:")===0))bustStandings();
++  const args={p_code:state.orgCode||"",p_op:op,p_key:key};
++  if(obj!==undefined)args.p_value=JSON.stringify(obj);
++  const res=await rpc("org_exec",args);
++  if(!res.ok&&res.err==="bad_code"){state.org=false;state.orgCode=null;showOrg();toast("Session expired — enter the access code again");}
++  return res.ok;
++}
++async function orgSet(k,obj){return orgRPC("set",k,obj);}
++async function orgDel(k){return orgRPC("del",k);}
+ async function getJSON(k,sh){const v=await sget(k,sh);if(v==null)return null;try{return typeof v==="string"?JSON.parse(v):v;}catch(e){return null;}}
+ async function setJSON(k,v,sh){return await sset(k,JSON.stringify(v),sh);}
+ /* Bulk fetch: all records under a prefix in ONE query (leaderboard at scale) */
+@@ -1124,18 +1176,19 @@ async function joinNow(){
+   if(!/^\d{4}$/.test(pin)){toast("Set a 4-digit PIN — it protects your entry");return;}
+   const sl=ig;
+   let existing=await getJSON("wc:player:"+sl,true);
+-  if(existing&&existing.pin){
+-    if(!pin){toast("@"+sl+" is PIN-locked — enter its 4-digit PIN");return;}
+-    if(await pinHash(pin)!==existing.pin){toast("Wrong PIN for @"+sl);return;}
+-  }
+   const country=document.getElementById("j-country").value||"Qatar";
+   if(!existing)existing={ig,name,dept,country,slug:sl,joinedAt:Date.now(),predictions:{}};
+   const rawName=document.getElementById("j-name").value.trim();
+   existing.name=rawName||existing.name||name;existing.dept=dept;existing.ig=ig;existing.country=country;
+-  if(pin&&!existing.pin)existing.pin=await pinHash(pin);
+-  const ok=await setJSON("wc:player:"+sl,existing,true);
+-  if(!ok){toast("Couldn't reach the database — try again");return;}
+-  state.player=existing;state.meSlug=sl;
++  delete existing.pin; /* PINs live server-side now (wc_auth) — never in the player row */
++  const res=await rpc("save_picks",{p_slug:sl,p_pin:pin,p_payload:existing});
++  if(!res.ok){
++    if(res.err==="wrong_pin")toast("Wrong PIN for @"+sl);
++    else toast("Couldn't reach the database — try again");
++    return;
++  }
++  state.player=res.j||existing;state.meSlug=sl;
++  lsSet("wc:pin",pin);
+   await setJSON("wc:me",sl,false);
+   document.getElementById("userchip").style.display="flex";
+   document.getElementById("countdown").style.display="flex";
+@@ -1146,7 +1199,7 @@ async function joinNow(){
+ }
+ async function signOut(){
+   if(!confirm("Sign out? Your predictions stay saved — sign back in with the same email to resume."))return;
+-  await sdel("wc:me",false);
++  await sdel("wc:me",false);lsDel("wc:pin");
+   state.meSlug=null;state.player=null;
+   document.getElementById("userchip").style.display="none";
+   document.getElementById("countdown").style.display="none";
+@@ -1390,7 +1443,7 @@ function saveScore(id,h,a){
+   queueSave();
+   if(P.h!=null&&P.a!=null)toast("Score saved · bonus armed ⚡");
+ }
+-async function persistPlayer(){const ok=await setJSON("wc:player:"+state.meSlug,state.player,true);if(!ok){toast("⚠️ Connection hiccup — retrying your save automatically…");setTimeout(queueSave,10000);}}
++async function persistPlayer(){const ok=await savePicksRPC();if(!ok&&lsGet("wc:pin")){toast("⚠️ Connection hiccup — retrying your save automatically…");setTimeout(queueSave,10000);}}
+ 
+ let LB_SHOWN=100;
+ /* Rank order everywhere: points, then most predictions, then exact, then correct */
+@@ -1500,10 +1553,12 @@ async function rivalHTML(s,st){
+ 
+ async function unlockOrg(){
+   const v=document.getElementById("org-pass").value;
+-  if(await pinHash(v)===PASS_HASH){state.org=true;await setJSON("wc:org",Date.now(),false);await propagate();showOrg();toast("Organizer unlocked 🔓 (auto-locks in 60 min)");}
++  const res=await rpc("org_check",{p_code:v});
++  if(res.ok&&res.j===true){state.org=true;state.orgCode=v;await setJSON("wc:org",Date.now(),false);await propagate();showOrg();toast("Organizer unlocked 🔓 — this tab only; relocks on reload");}
++  else if(!res.ok)toast("Couldn't reach the database — try again");
+   else toast("Incorrect access code");
+ }
+-function lockOrg(){state.org=false;lsDel("wc:org");showOrg();toast("Organizer panel locked 🔒");}
++function lockOrg(){state.org=false;state.orgCode=null;lsDel("wc:org");showOrg();toast("Organizer panel locked 🔒");}
+ function showOrg(){
+   document.getElementById("org-locked").style.display=state.org?"none":"block";
+   document.getElementById("org-panel").style.display=state.org?"block":"none";
+@@ -1517,7 +1572,7 @@ function showOrg(){
+       oc.addEventListener("change",async()=>{
+         if(oc.value){if(!confirm("Set "+oc.value+" as World Champion and award +"+CHAMP_PTS+" pts to correct picks?")){oc.value=state.results._champ||"";return;}state.results._champ=oc.value;}
+         else delete state.results._champ;
+-        await setJSON("wc:results",state.results,true);updateChip();
++        await orgSet("wc:results",state.results);updateChip();
+         toast(oc.value?("Champion set: "+oc.value+" 🏆"):"Champion result cleared");
+       });
+     }
+@@ -1550,9 +1605,9 @@ function renderResultsEditor(){
+   if(document.getElementById("pp-match"))renderPicks();
+ }
+ async function saveResult(id,h,a,quiet){
+-  if(h===""||a===""){delete state.results[id];await setJSON("wc:results",state.results,true);const m=document.querySelector('[data-rs="'+id+'"]');if(m)m.textContent="";updateChip();return false;}
++  if(h===""||a===""){delete state.results[id];await orgSet("wc:results",state.results);const m=document.querySelector('[data-rs="'+id+'"]');if(m)m.textContent="";updateChip();return false;}
+   state.results[id]={h:Math.max(0,parseInt(h,10)||0),a:Math.max(0,parseInt(a,10)||0)};
+-  const ok=await setJSON("wc:results",state.results,true);
++  const ok=await orgSet("wc:results",state.results);
+   const m=document.querySelector('[data-rs="'+id+'"]');
+   if(!ok){delete state.results[id];if(m)m.textContent="✗";toast("⚠ Save failed — check connection and retry");return false;}
+   if(m)m.textContent="✓";
+@@ -1692,8 +1747,8 @@ async function orgSetKTeam(id){
+   if(h&&a&&h===a){toast("Pick two different teams");renderResultsEditor();return;}
+   if(h||a)state.kteams[id]={h:h,a:a};else delete state.kteams[id];
+   const r=state.results[id];
+-  if(r&&r.w&&r.w!==h&&r.w!==a){delete state.results[id];await setJSON("wc:results",state.results,true);}
+-  await setJSON("wc:kteams",state.kteams,true);
++  if(r&&r.w&&r.w!==h&&r.w!==a){delete state.results[id];await orgSet("wc:results",state.results);}
++  await orgSet("wc:kteams",state.kteams);
+   await propagate();
+   updateChip();renderResultsEditor();
+   toast("Bracket updated ✓");
+@@ -1701,7 +1756,7 @@ async function orgSetKTeam(id){
+ async function orgSetKWinner(id){
+   const v=document.querySelector('[data-kw="'+id+'"]').value;
+   if(!v)delete state.results[id];else state.results[id]={w:v};
+-  await setJSON("wc:results",state.results,true);
++  await orgSet("wc:results",state.results);
+   await propagate();
+   updateChip();renderResultsEditor();
+   toast(v?(v+" through — next round updated 🏆"):"Winner cleared");
+@@ -1726,8 +1781,8 @@ async function propagate(){
+     const r=state.results[id];
+     if(r&&r.w&&cur.h&&cur.a&&r.w!==cur.h&&r.w!==cur.a){delete state.results[id];rch=true;}
+   }
+-  if(kch)await setJSON("wc:kteams",state.kteams,true);
+-  if(rch)await setJSON("wc:results",state.results,true);
++  if(kch)await orgSet("wc:kteams",state.kteams);
++  if(rch)await orgSet("wc:results",state.results);
+   return kch||rch;
+ }
+ function toggleDemo(){
+@@ -1750,9 +1805,9 @@ async function restoreBackup(inp){
+     const data=JSON.parse(await f.text());
+     const n=(data.players||[]).length;
+     if(!confirm("Restore "+n+" players + results from this backup? Same-handle entries get overwritten."))return;
+-    if(data.results){state.results=data.results;await setJSON("wc:results",state.results,true);}
+-    if(data.kteams){state.kteams=data.kteams;await setJSON("wc:kteams",state.kteams,true);}
+-    for(const p of (data.players||[])){if(p&&p.slug)await setJSON("wc:player:"+p.slug,p,true);}
++    if(data.results){state.results=data.results;await orgSet("wc:results",state.results);}
++    if(data.kteams){state.kteams=data.kteams;await orgSet("wc:kteams",state.kteams);}
++    for(const p of (data.players||[])){if(p&&p.slug)await orgSet("wc:player:"+p.slug,p);}
+     await propagate();
+     toast("Backup restored ✓");updateChip();
+   }catch(e){toast("Couldn't read that backup file");}
+@@ -1761,9 +1816,8 @@ async function restoreBackup(inp){
+ async function orgClearPin(){
+   const h=document.getElementById("org-pinclear").value.trim().replace(/^@+/,"").toLowerCase();
+   if(!h)return;
+-  const p=await getJSON("wc:player:"+h,true);
+-  if(!p){toast("No player @"+h);return;}
+-  delete p.pin;await setJSON("wc:player:"+h,p,true);
++  const ok=await orgRPC("clearpin",h);
++  if(!ok){toast("Couldn't clear that PIN — try again");return;}
+   document.getElementById("org-pinclear").value="";
+   toast("PIN cleared for @"+h+" — they set a new one on next sign-in");
+ }
+@@ -1798,7 +1852,7 @@ async function orgDelete(){
+   const h=document.getElementById("org-del").value.trim().replace(/^@+/,"").toLowerCase();
+   if(!h)return;
+   if(!confirm("Remove @"+h+" and all their picks?"))return;
+-  await sdel("wc:player:"+h,true);
++  await orgDel("wc:player:"+h);
+   document.getElementById("org-del").value="";
+   toast("@"+h+" removed");
+ }
+@@ -1806,8 +1860,8 @@ async function resetAll(){
+   if(!confirm("This permanently deletes ALL players and results from the shared leaderboard. Continue?"))return;
+   if(prompt('Final check — type RESET (capitals) to confirm wiping everything:')!=="RESET"){toast("Reset cancelled");return;}
+   const keys=await slist("wc:player:",true);
+-  for(const k of keys)await sdel(k,true);
+-  await sdel("wc:results",true);await sdel("wc:kteams",true);await sdel("wc:me",false);
++  for(const k of keys)await orgDel(k);
++  await orgDel("wc:results");await orgDel("wc:kteams");await sdel("wc:me",false);
+   state.results={};state.kteams={};state.player=null;state.meSlug=null;
+   toast("All challenge data cleared");
+   document.getElementById("userchip").style.display="none";
+@@ -2481,8 +2535,7 @@ function liveTick(){
+ (async function init(){
+   state.results=await getJSON("wc:results",true)||{};
+   state.kteams=await getJSON("wc:kteams",true)||{};
+-  const orgTs=await getJSON("wc:org",false);
+-  state.org=(typeof orgTs==="number"&&Date.now()-orgTs<ORG_TTL)||false;
++  state.org=false; /* org actions are server-verified per call — unlock fresh each load */
+   const me=await getJSON("wc:me",false);
+   if(me){const p=await getJSON("wc:player:"+me,true);if(p){state.player=p;state.meSlug=me;}}
+   state.filter=defaultRound();

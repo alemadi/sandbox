@@ -1,0 +1,438 @@
+
+
+[1m============================================================
+RESET — drop & recreate database wc
+============================================================[0m
+DROP DATABASE
+CREATE DATABASE
+
+
+[1m============================================================
+STAGE 1 — recreate the LIVE pre-protect shape (vulnerable)
+============================================================[0m
+stage 1 loaded.
+
+
+[1m============================================================
+ATTACK #1 — the four cheats against the UNPROTECTED backend (all succeed)
+============================================================[0m
+Pager usage is off.
+
+################ CHEAT 1 — edit a pick AFTER kickoff ################
+# m1 (Mexico v South Africa) kicked off 2026-06-11. Alice tries to
+# rewrite her m1 prediction to a perfect 5-0 from DevTools/curl.
+SET
+UPDATE 1
+RESET
+# --> stored m1 prediction for alice now reads:
+          alice_m1          
+----------------------------
+ {"a": 0, "h": 5, "o": "H"}
+(1 row)
+
+
+################ CHEAT 2 — forge an official result ################
+# m5 (Qatar v Switzerland) has not been played. Anon injects a
+# fabricated 9-0 result straight into wc:results.
+SET
+UPDATE 1
+RESET
+# --> wc:results m5 now reads:
+    results_m5    
+------------------
+ {"a": 0, "h": 9}
+(1 row)
+
+
+################ CHEAT 3 — steal a PIN + hijack a rival ################
+# Anon reads Bob's PIN hash from his own row, then overwrites his
+# entire entry (wipes his picks / defaces his profile).
+SET
+                       bob_pin_hash_exposed                       
+------------------------------------------------------------------
+ e92b5a379500ff0b2b3041eaf8506472b1f0b2e6e7aac1f83363994f78d16d2a
+(1 row)
+
+UPDATE 1
+RESET
+# --> Bob's stored row now reads:
+ bob_name | bob_preds 
+----------+-----------
+ HACKED   | {}
+(1 row)
+
+
+################ CHEAT 4 — delete a rival entirely ################
+# Anon deletes Carol's row to knock her off the leaderboard.
+SET
+DELETE 1
+RESET
+# --> Carol still present? (1 = yes, 0 = deleted):
+ carol_rows 
+------------
+          0
+(1 row)
+
+
+
+
+[1m============================================================
+RE-SEED — restore known-good state before hardening
+============================================================[0m
+psql:/home/claude/wc/proof/01_seed.sql:8: NOTICE:  extension "pgcrypto" already exists, skipping
+re-seeded.
+
+
+[1m============================================================
+HARDEN — apply protect.sql (RLS wall + RPCs + pin migration)
+============================================================[0m
+psql:/home/claude/wc/sql/protect.sql:17: NOTICE:  extension "pgcrypto" already exists, skipping
+CREATE EXTENSION
+CREATE TABLE
+INSERT 0 105
+CREATE TABLE
+INSERT 0 3
+UPDATE 3
+CREATE TABLE
+INSERT 0 1
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+ALTER TABLE
+psql:/home/claude/wc/sql/protect.sql:365: NOTICE:  policy "kv_read_all" for relation "public.kv" does not exist, skipping
+DROP POLICY
+CREATE POLICY
+REVOKE
+GRANT
+REVOKE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+REVOKE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+REVOKE
+REVOKE
+REVOKE
+REVOKE
+GRANT
+GRANT
+GRANT
+GRANT
+
+
+[1m============================================================
+ATTACK #2 — the SAME four cheats against the PROTECTED backend (all blocked)
+============================================================[0m
+Pager usage is off.
+
+################ CHEAT 1 — edit a pick AFTER kickoff ################
+# m1 (Mexico v South Africa) kicked off 2026-06-11. Alice tries to
+# rewrite her m1 prediction to a perfect 5-0 from DevTools/curl.
+SET
+psql:/home/claude/wc/proof/10_cheats.sql:18: ERROR:  permission denied for table kv
+RESET
+# --> stored m1 prediction for alice now reads:
+          alice_m1          
+----------------------------
+ {"a": 1, "h": 2, "o": "H"}
+(1 row)
+
+
+################ CHEAT 2 — forge an official result ################
+# m5 (Qatar v Switzerland) has not been played. Anon injects a
+# fabricated 9-0 result straight into wc:results.
+SET
+psql:/home/claude/wc/proof/10_cheats.sql:30: ERROR:  permission denied for table kv
+RESET
+# --> wc:results m5 now reads:
+ results_m5 
+------------
+ 
+(1 row)
+
+
+################ CHEAT 3 — steal a PIN + hijack a rival ################
+# Anon reads Bob's PIN hash from his own row, then overwrites his
+# entire entry (wipes his picks / defaces his profile).
+SET
+ bob_pin_hash_exposed 
+----------------------
+ 
+(1 row)
+
+psql:/home/claude/wc/proof/10_cheats.sql:43: ERROR:  permission denied for table kv
+RESET
+# --> Bob's stored row now reads:
+ bob_name |                              bob_preds                               
+----------+----------------------------------------------------------------------
+ Bob      | {"m1": {"a": 1, "h": 1, "o": "D"}, "m3": {"a": 0, "h": 2, "o": "H"}}
+(1 row)
+
+
+################ CHEAT 4 — delete a rival entirely ################
+# Anon deletes Carol's row to knock her off the leaderboard.
+SET
+psql:/home/claude/wc/proof/10_cheats.sql:53: ERROR:  permission denied for table kv
+RESET
+# --> Carol still present? (1 = yes, 0 = deleted):
+ carol_rows 
+------------
+          1
+(1 row)
+
+
+
+
+[1m============================================================
+LEGIT — the real player & organizer paths still work
+============================================================[0m
+Pager usage is off.
+Timing is on.
+
+======== A) save_picks with the CORRECT pin ========
+# Alice (pin 1234) sends her FULL predictions: she TAMPERS m1 (locked,
+# kicked off yesterday) to 0-9, keeps m5, and adds a fresh m10 pick.
+# Expect: m1 kept as the stored 2-1, m5 kept, m10 accepted.
+SET
+Time: 0.081 ms
+               stored_row                
+-----------------------------------------
+ {                                      +
+     "ig": "alice",                     +
+     "dept": "Treasury",                +
+     "name": "Alice",                   +
+     "slug": "alice",                   +
+     "champ": "Brazil",                 +
+     "country": "QA",                   +
+     "joinedAt": "2026-06-01T08:00:00Z",+
+     "predictions": {                   +
+         "m1": {                        +
+             "a": 1,                    +
+             "h": 2,                    +
+             "o": "H"                   +
+         },                             +
+         "m2": {                        +
+             "a": 1,                    +
+             "h": 0,                    +
+             "o": "A"                   +
+         },                             +
+         "m5": {                        +
+             "a": 1,                    +
+             "h": 1,                    +
+             "o": "D"                   +
+         },                             +
+         "m10": {                       +
+             "a": 1,                    +
+             "h": 3,                    +
+             "o": "H"                   +
+         }                              +
+     }                                  +
+ }
+(1 row)
+
+Time: 7.330 ms
+RESET
+Time: 0.029 ms
+
+======== B) save_picks with a WRONG pin (note the ~0.3s nap) ========
+SET
+Time: 0.014 ms
+psql:/home/claude/wc/proof/20_legit.sql:27: ERROR:  wrong_pin
+CONTEXT:  PL/pgSQL function save_picks(text,text,jsonb) line 28 at RAISE
+Time: 300.813 ms
+RESET
+Time: 0.053 ms
+
+======== C) a brand-new player claims their slug ========
+# Dave has never played; first save with pin 1111 claims slug "dave".
+SET
+Time: 0.020 ms
+ dave_created 
+--------------
+ t
+(1 row)
+
+Time: 1.953 ms
+RESET
+Time: 0.042 ms
+# Dave now in wc_auth (pin stored privately, never in kv)?
+ dave_has_auth | dave_row_has_pin 
+---------------+------------------
+ t             | f
+(1 row)
+
+Time: 0.228 ms
+
+======== D) champion-pick seal (same lock machinery as matches) ========
+# _champ locks 2026-06-18, still future, so we PROVE the seal inside a
+# transaction that back-dates the lock, then ROLL BACK (real date kept).
+BEGIN
+Time: 0.017 ms
+UPDATE 1
+Time: 0.101 ms
+SET
+Time: 0.024 ms
+ champ_after_locked_change_attempt 
+-----------------------------------
+ Brazil
+(1 row)
+
+Time: 0.662 ms
+RESET
+Time: 0.020 ms
+ROLLBACK
+Time: 0.019 ms
+# (rolled back — _champ lock back to its real 2026-06-18 date)
+    champ_lock_real     
+------------------------
+ 2026-06-18 16:00:00+00
+(1 row)
+
+Time: 0.060 ms
+
+======== E) standings() still readable by anon (RLS read policy) ========
+SET
+Time: 0.016 ms
+ slug  | pts | predicted 
+-------+-----+-----------
+ alice |   0 |         4
+ bob   |   0 |         2
+ carol |   0 |         2
+ dave  |   0 |         1
+(4 rows)
+
+Time: 1.867 ms
+RESET
+Time: 0.024 ms
+
+======== F) organizer path — code verified in SQL ========
+# Rotate the org code to a known proof value (prod keeps the real
+# shipped hash; rotate with: update wc_org_auth set code_hash=wc_pin_hash(...)).
+UPDATE 1
+Time: 1.068 ms
+# F1: wrong code -> false (+~0.4s nap):
+SET
+Time: 0.029 ms
+ wrong_code_ok 
+---------------
+ f
+(1 row)
+
+Time: 400.828 ms
+# F2: right code -> true:
+ right_code_ok 
+---------------
+ t
+(1 row)
+
+Time: 0.324 ms
+# F3: organizer legitimately confirms m5 = 2-1 via org_exec:
+ org_set_m5 
+------------
+ ok
+(1 row)
+
+Time: 1.981 ms
+# F4: WRONG code cannot write (expect bad_code):
+psql:/home/claude/wc/proof/20_legit.sql:77: ERROR:  bad_code
+CONTEXT:  PL/pgSQL function org_exec(text,text,text,text) line 5 at RAISE
+Time: 400.909 ms
+RESET
+Time: 0.051 ms
+# --> wc:results m5 after organizer action:
+    results_m5    
+------------------
+ {"a": 1, "h": 2}
+(1 row)
+
+Time: 0.253 ms
+Timing is off.
+
+
+
+[1m============================================================
+ROBOT — ESPN auto-confirm still runs, never overwrites the organizer
+============================================================[0m
+Pager usage is off.
+
+-- SETUP: organizer pre-confirms m1 = 7-7 (via the gated RPC) --
+SET
+ org_preset_m1 
+---------------
+ ok
+(1 row)
+
+RESET
+-- wc:results before the robot runs: --
+                  results_before                  
+--------------------------------------------------
+ {"m1": {"a": 7, "h": 7}, "m5": {"a": 1, "h": 2}}
+(1 row)
+
+
+======== TICK 1 — no response waiting yet; should fire a fetch ========
+                     tick1_result                      
+-------------------------------------------------------
+ confirmed 0 · snapshot -→2026-06-12 · next fetch: yes
+(1 row)
+
+(robot queued ESPN request id = 1)
+-- the URL it asked for: --
+                                                 fetched_url                                                  
+--------------------------------------------------------------------------------------------------------------
+ https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?limit=120&dates=20260611-20260612
+(1 row)
+
+
+======== DELIVER the canned ESPN scoreboard (async response arrives) ========
+# m1 Mexico 2-1 South Africa (completed) · m2 Korea Republic 1-0 Czech Republic (completed)
+INSERT 0 1
+
+======== TICK 2 — consumes the response, confirms finished GROUP games ========
+                          tick2_result                          
+----------------------------------------------------------------
+ confirmed 1 · snapshot 2026-06-12→2026-06-12 · next fetch: yes
+(1 row)
+
+
+-- FINAL wc:results: m1 kept as organizer 7-7, m2 added by robot 1-0 --
+  results_after  
+-----------------
+ {              +
+     "m1": {    +
+         "a": 7,+
+         "h": 7 +
+     },         +
+     "m2": {    +
+         "a": 0,+
+         "h": 1 +
+     },         +
+     "m5": {    +
+         "a": 1,+
+         "h": 2 +
+     }          +
+ }
+(1 row)
+
+
+-- standings() now reflects the confirmed results (anon-readable) --
+SET
+ slug  | pts | correct | predicted 
+-------+-----+---------+-----------
+ bob   |   3 |       1 |         2
+ carol |   3 |       1 |         2
+ alice |   0 |       0 |         4
+ dave  |   0 |       0 |         1
+(4 rows)
+
+RESET
+
+
+
+[1m============================================================
+DONE — all four vectors closed; legit paths + robot intact
+============================================================[0m

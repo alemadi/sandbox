@@ -1,0 +1,14 @@
+{
+  "name": "Staff Challenge — SANDBOX (local test)",
+  "short_name": "SC Sandbox",
+  "description": "Local-only R&D sandbox copy of Staff Challenge 26. No backend, no production data.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0a0a0c",
+  "theme_color": "#0a0a0c",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
