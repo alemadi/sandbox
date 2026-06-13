@@ -528,6 +528,9 @@
   @keyframes rvgold{30%{box-shadow:0 0 46px rgba(180,151,89,.65);border-color:var(--gold)}}
   @keyframes rvflash{30%{box-shadow:0 0 34px rgba(61,220,151,.45)}}
   @keyframes rvshake{20%{transform:translateX(-7px)}45%{transform:translateX(6px)}70%{transform:translateX(-3px)}}
+  .rv-card.closefx{animation:rvclose .6s ease}
+  @keyframes rvclose{0%{box-shadow:0 0 0 rgba(227,179,65,0)}35%{transform:translateX(-5px);box-shadow:0 0 30px rgba(227,179,65,.45)}55%{transform:translateX(5px)}78%{transform:translateX(-2px)}}
+  .rv-stamp.near{background:rgba(227,179,65,.16);color:var(--gold-bright);border:1px solid rgba(227,179,65,.5)}
   .rv-quick,.rv-quick .rv-res,.rv-quick .rv-stamp{transition-duration:.15s}
   .rv-done{text-align:center}
   .rv-big{font-family:var(--font-d);font-size:54px;color:var(--gold-bright);letter-spacing:.02em;margin-top:8px}
@@ -610,6 +613,44 @@
   .me-fun{margin:14px auto 2px;font-size:11.5px;color:var(--muted);font-weight:700;line-height:2;letter-spacing:.2px}
   .me-fun b{color:var(--gold)}
   .me-fun .fl-img{width:15px;height:11px;border-radius:2px;vertical-align:-1px}
+  /* ===== UX wave 4: "Your Day" home card + reveal badge ===== */
+  .yourday{margin:14px 0 6px;background:linear-gradient(100deg,rgba(180,151,89,.14),rgba(255,255,255,.045));border:1px solid var(--line);border-radius:18px;padding:14px 15px;animation:rise .5s both}
+  .yd-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .yd-hi{font-family:var(--font-d);font-size:20px;letter-spacing:.4px;color:var(--cream)}
+  .yd-rank{font-family:var(--font-d);font-size:22px;background:linear-gradient(var(--gold-bright),var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+  .yd-rank span{font-family:var(--font-b);font-size:11px;color:var(--faint);-webkit-text-fill-color:var(--faint)}
+  .yd-delta{margin-top:7px;font-size:13px;color:var(--muted);font-weight:600}
+  .yd-delta .up{color:var(--ok)}
+  .yd-mv{margin-top:7px;font-size:12.5px;font-weight:700;border-radius:10px;padding:7px 10px;line-height:1.35}
+  .yd-mv.up{color:var(--ok);background:rgba(61,220,151,.10)}
+  .yd-mv.down{color:#ffd27a;background:rgba(239,179,64,.10)}
+  .yd-rows{display:flex;flex-direction:column;gap:7px;margin-top:11px}
+  .yd-row{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--cream);font-size:13.5px;font-weight:700;cursor:pointer;min-height:48px;transition:.15s}
+  .yd-row:hover{border-color:var(--gold);background:var(--glass-2)}
+  .yd-row.yd-rev{border-color:rgba(227,179,65,.5);background:linear-gradient(100deg,rgba(227,179,65,.16),rgba(255,255,255,.05))}
+  .yd-row.yd-radar{border-color:rgba(239,51,64,.45)}
+  .yd-go{font-size:12px;color:var(--gold);font-weight:800;white-space:nowrap}
+  .yd-meter{margin-top:12px}
+  .yd-mtop{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:700}
+  .yd-mtop b{color:var(--gold)}
+  .yd-bar{height:7px;border-radius:6px;background:rgba(0,0,0,.3);overflow:hidden}
+  .yd-bar>i{display:block;height:100%;border-radius:6px;background:var(--tiles);transition:width .5s ease}
+  nav.bottom .navbtn{position:relative}
+  .nav-badge{position:absolute;top:5px;left:calc(50% + 6px);min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:var(--magenta);color:#fff;font-size:10px;font-weight:800;line-height:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.45)}
+  /* ===== UX wave 5: swipe combo + install coach ===== */
+  .sw-combo{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 60px);transform:translateX(-50%) scale(.8);z-index:9990;background:linear-gradient(100deg,rgba(239,51,64,.94),rgba(255,94,87,.94));color:#fff;font-weight:800;font-size:14px;padding:7px 15px;border-radius:99px;box-shadow:0 5px 20px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .18s ease,transform .18s ease}
+  .sw-combo.show{opacity:1;transform:translateX(-50%) scale(1)}
+  .sw-combo.pop{animation:scombo .42s ease}
+  @keyframes scombo{0%{transform:translateX(-50%) scale(.7)}45%{transform:translateX(-50%) scale(1.16)}100%{transform:translateX(-50%) scale(1)}}
+  .install-coach{position:fixed;left:12px;right:12px;bottom:calc(var(--nav-h) + 12px + env(safe-area-inset-bottom));z-index:200;max-width:736px;margin:0 auto;background:linear-gradient(100deg,rgba(180,151,89,.18),rgba(18,18,22,.98));border:1px solid var(--gold-deep);border-radius:16px;padding:13px 14px;box-shadow:0 12px 32px rgba(0,0,0,.5);transform:translateY(18px);opacity:0;transition:.28s ease}
+  .install-coach.show{transform:none;opacity:1}
+  .install-coach .ic-row{display:flex;align-items:flex-start;gap:11px}
+  .install-coach .ic-ic{font-size:22px;line-height:1.1}
+  .install-coach .ic-msg{flex:1;font-size:13px;color:var(--cream);font-weight:600;line-height:1.45}
+  .install-coach .ic-msg b{color:var(--gold-bright);font-weight:800}
+  .install-coach .ic-x{background:none;border:0;color:var(--faint);font-size:15px;cursor:pointer;padding:2px 4px;flex-shrink:0;line-height:1}
+  .install-coach .ic-cta{margin-top:10px;width:100%;background:linear-gradient(100deg,var(--gold-deep),var(--gold));color:#181106;border:0;border-radius:11px;padding:11px;font-weight:800;font-size:13.5px;cursor:pointer;min-height:44px}
+  .install-coach .ic-cta.ghost{background:var(--glass);color:var(--cream);border:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -717,6 +758,7 @@
   <!-- MATCHES -->
   <section class="view" id="view-matches">
     <div class="sec-title"><h2>Matches</h2><div class="tag" id="match-tag">104 fixtures</div></div>
+    <div id="yourday" class="yourday" style="display:none"></div>
     <div id="pulsebar" class="pulsebar" style="display:none" onclick="location.href='watch.html'" title="Where to watch" role="link"></div>
     <div id="daybanner" class="daybanner" style="display:none"></div>
     <div id="daily-hub"></div>
@@ -1561,6 +1603,7 @@ function meChampLine(){
 function renderMatches(){
   if(!state.player)return;
   renderChampCard();
+  try{renderYourDay();}catch(e){}
   try{renderDailyHub();}catch(e){}
   const c=predCount(),tot=predTotal();
   document.getElementById("pred-count").textContent=c;
@@ -2069,6 +2112,7 @@ async function rivalHTML(s,st){
       inner='<div class="rv-t">\ud83c\udfaf Rival watch</div>'+
         '<div class="rv-line"><b>You '+myPts+'</b><span class="rv-vs">VS</span><b>'+rv.pts+' '+esc(rv.name)+'</b></div>'+
         '<div class="rv-sub">'+(diff>0?("You lead by "+diff+" pt"+(diff===1?"":"s")):(diff<0?(esc(rv.name)+" leads by "+(-diff)+" pt"+(diff===-1?"":"s")):"Dead level"))+' \u00b7 they\u2019re #'+(idx+1)+'</div>'+
+        '<button class="btn btn-ghost btn-sm" style="margin:8px auto 0;display:block" onclick="shareCard()">⚔ Share the challenge</button>'+
         '<button class="rv-x" onclick="clearRival()">change rival</button>';
     }else inner='<button class="btn btn-ghost btn-sm" style="margin:0 auto" onclick="pickRival()">\ud83c\udfaf Pick a rival</button><div id="rival-slot"></div>';
   }else inner='<button class="btn btn-ghost btn-sm" style="margin:0 auto" onclick="pickRival()">\ud83c\udfaf Pick a rival</button><div id="rival-slot"></div>';
@@ -2569,18 +2613,33 @@ async function shareCard(){
       x.strokeStyle="rgba(244,238,227,.14)";x.lineWidth=2;roundRect(x,cx-125,930,250,170,22);x.stroke();
       x.fillStyle="#e3d3a3";x.font="400 84px Anton,'Arial Narrow',sans-serif";x.fillText(String(p[0]),cx,1018);
       x.fillStyle="rgba(244,238,227,.5)";x.font="700 22px 'Hanken Grotesk',sans-serif";x.fillText(p[1],cx,1066);});
-    const flin=shareFunLine();
-    if(flin){x.fillStyle="rgba(227,211,163,.85)";x.font="600 28px 'Hanken Grotesk',sans-serif";
-      x.fillText("\u2728 "+flin+" \u2728",W/2,1158);}
-    x.fillStyle="#b49759";x.font="700 30px 'Hanken Grotesk',sans-serif";
-    x.fillText("Think you can beat me? \u2192 staffchallenge26.com",W/2,1220);
+    var shareText="My World Cup 26 standing \u2014 come beat me: https://staffchallenge26.com";
+    var rivalSlug=null;try{rivalSlug=await getJSON("wc:rival",false);}catch(e){}
+    rivalSlug=rivalSlug&&(rivalSlug.slug||rivalSlug);
+    var rv=null,rrank=null;
+    if(rivalSlug&&typeof rivalSlug==="string"){rv=st.find(function(r){return r.slug===rivalSlug;})||null;if(rv)st.forEach(function(r,i){if(r.slug===rivalSlug&&rrank===null)rrank=i+1;});}
+    if(rv){
+      var gap=sc.pts-rv.pts;
+      var verdict=gap>0?("Leading "+rv.name+" by "+gap+" \u2014 catch me if you can!"):(gap<0?("Chasing "+rv.name+" \u2014 "+(-gap)+" behind. Game on."):("Dead level with "+rv.name+" \u2014 it's on."));
+      x.fillStyle="rgba(244,238,227,.5)";x.font="700 24px 'Hanken Grotesk',sans-serif";x.fillText("HEAD TO HEAD",W/2,1126);
+      x.fillStyle="#f4eee3";x.font="800 30px 'Hanken Grotesk',sans-serif";x.fillText("You "+sc.pts+"    vs    "+rv.name+" "+rv.pts,W/2,1164);
+      x.fillStyle="rgba(227,211,163,.92)";x.font="700 25px 'Hanken Grotesk',sans-serif";x.fillText(verdict,W/2,1202);
+      x.fillStyle="#b49759";x.font="700 28px 'Hanken Grotesk',sans-serif";x.fillText("\u2192 staffchallenge26.com",W/2,1240);
+      shareText=verdict+" \u2014 https://staffchallenge26.com";
+    }else{
+      var flin=shareFunLine();
+      if(flin){x.fillStyle="rgba(227,211,163,.85)";x.font="600 28px 'Hanken Grotesk',sans-serif";
+        x.fillText("\u2728 "+flin+" \u2728",W/2,1158);}
+      x.fillStyle="#b49759";x.font="700 30px 'Hanken Grotesk',sans-serif";
+      x.fillText("Think you can beat me? \u2192 staffchallenge26.com",W/2,1220);
+    }
     x.fillStyle="rgba(244,238,227,.35)";x.font="600 22px 'Hanken Grotesk',sans-serif";
     x.fillText("QNB Staff World Cup 2026 \u00b7 11 June \u2013 19 July",W/2,1266);
     c.toBlob(async b=>{
       if(!b){toast("Couldn\u2019t build the card");return;}
       const f=new File([b],"matchday-card.png",{type:"image/png"});
       if(navigator.canShare&&navigator.canShare({files:[f]})){
-        try{await navigator.share({files:[f],title:"Staff Challenge",text:"My World Cup 26 standing \u2014 come beat me: https://staffchallenge26.com"});return;}catch(e){if(e&&e.name==="AbortError")return;}
+        try{await navigator.share({files:[f],title:"Staff Challenge",text:shareText});return;}catch(e){if(e&&e.name==="AbortError")return;}
       }
       const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="matchday-card.png";a.click();
       setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Card saved \u2014 share it on the group \ud83d\udce4");
@@ -2911,6 +2970,7 @@ function tone(f,t,d,g){const a=actx();if(!a)return;
 function sndTick(force){if(!sndOn()&&!force)return;try{tone(1200,0,.04);}catch(e){}}
 function sndCorrect(){if(!sndOn())return;try{tone(600,0,.07);tone(900,.08,.1);}catch(e){}}
 function sndExact(){if(!sndOn())return;try{tone(800,0,.06);tone(1200,.07,.06);tone(1600,.14,.14);tone(2400,.3,.06,.03);}catch(e){}}
+function sndClose(){if(!sndOn())return;try{tone(520,0,.08);tone(430,.09,.13,.025);}catch(e){}}
 function odo(el,from,to,ms){
   if(!el)return;
   const rm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -2932,7 +2992,7 @@ function rvVerdict(m,p,r){
   const oc=p.o===ro;const pts=(oc?3:0)+(ex?2:0);
   if(ex&&oc)return{pts:pts,cls:"exact",label:"\u25ce EXACT! +"+pts};
   if(ex)return{pts:pts,cls:"hit",label:"\u25ce exact score +"+pts};
-  if(oc)return{pts:pts,cls:"hit",label:"\u2713 +"+pts};
+  if(oc){var near=(p.h!=null&&p.a!=null)&&(Math.abs(Number(p.h)-r.h)+Math.abs(Number(p.a)-r.a))<=1;return{pts:pts,cls:"hit",near:near,label:"\u2713 +"+pts+(near?" \u00b7 so close":"")};}
   return{pts:0,cls:"miss",label:"\u2717 +0"};
 }
 function markRevealed(id){
@@ -2970,6 +3030,7 @@ function closeReveal(){
   RV.open=false;clearTimeout(RV.timer);
   document.getElementById("reveal").style.display="none";
   document.body.style.overflow="";
+  try{updateRevealBadge();renderYourDay();}catch(e){}
 }
 function renderRevealCard(){
   const m=RV.q[RV.i];
@@ -2994,15 +3055,16 @@ function revealFlip(){
   clearTimeout(RV.timer);
   const m=RV.q[RV.i],p=state.player.predictions[m.id]||{},r=state.results[m.id];
   const v=rvVerdict(m,p,r);
-  card.classList.add("flipped",v.cls+"fx");
+  card.classList.add("flipped",(v.near?"close":v.cls)+"fx");
   const st=document.getElementById("rv-stamp");
-  st.textContent=v.label;st.className="rv-stamp "+v.cls;
+  st.textContent=v.label;st.className="rv-stamp "+v.cls+(v.near?" near":"");
   const cn=document.getElementById("rv-cons");
   if(cn){const ct=consRevealText(m,r,v);if(ct)cn.textContent=ct;}
   const from=RV.total;RV.total+=v.pts;
   odo(document.getElementById("rv-odo"),from,RV.total,500);
   try{
     if(v.cls==="exact"){navigator.vibrate&&navigator.vibrate([10,40,10,40,30]);sndExact();}
+    else if(v.near){navigator.vibrate&&navigator.vibrate([20,40,20]);sndClose();}
     else if(v.cls==="hit"){navigator.vibrate&&navigator.vibrate([15,60,15]);sndCorrect();}
   }catch(e){}
   markRevealed(m.id);
@@ -3154,6 +3216,130 @@ function renderDayBanner(){
   el.style.display="block";
 }
 
+/* ===== UX wave 4: "Your Day" home card + reveal badge ===== */
+function ydGreeting(){try{const h=new Date(Date.now()+CLOCK_OFFSET+3*36e5).getUTCHours();return h<12?"Good morning":(h<18?"Good afternoon":"Good evening");}catch(e){return "Welcome back";}}
+function groupProgress(){let pc=0;FIXTURES.forEach(function(f){if(!f.kn){const p=state.player.predictions[f.id];if(p&&p.o)pc++;}});return {pc:pc,tot:GROUP_TOTAL};}
+function locksTodayUnpicked(){
+  const now=Date.now()+CLOCK_OFFSET;const doha=function(t){return new Date(t+3*36e5).toISOString().slice(0,10);};const today=doha(now);
+  let n=0,pts=0;
+  FIXTURES.forEach(function(m){
+    const pickable=m.kn?koReady(m):true;if(!pickable)return;
+    const lt=lockTs(m);if(lt<=now)return;if(doha(lt)!==today)return;
+    const p=state.player.predictions[m.id]||{};if(p.o||p.w)return;
+    n++;pts+=m.kn?koPts(m):3;
+  });
+  return {n:n,pts:pts};
+}
+async function overnightMovers(){
+  try{
+    const snap=await rankSnap();if(!snap||!snap.ranks)return null;
+    const st=(await fetchStandings()).slice().sort(cmpSt);
+    const meThen=snap.ranks[state.meSlug];let meNow=null;
+    st.forEach(function(r,i){if(r.slug===state.meSlug)meNow=i+1;});
+    if(meNow==null||meThen==null)return null;
+    const passedBy=[],overtook=[];
+    st.forEach(function(r,i){
+      if(r.slug===state.meSlug)return;const then=snap.ranks[r.slug];if(then==null)return;const now=i+1;
+      if(then>meThen&&now<meNow)passedBy.push(r.name||"Someone");
+      if(then<meThen&&now>meNow)overtook.push(r.name||"Someone");
+    });
+    return {passedBy:passedBy,overtook:overtook};
+  }catch(e){return null;}
+}
+async function buildYourDay(){
+  if(!state.player||state.demo)return;
+  try{
+    const st=(await fetchStandings()).slice().sort(cmpSt);
+    let rank=null,pts=0;st.forEach(function(r,i){if(r.slug===state.meSlug&&rank===null){rank=i+1;pts=r.pts|0;}});
+    const seen=await getJSON("wc:ydSeen",false);
+    let dPts=0,dRank=0;
+    if(seen&&typeof seen.pts==="number"){dPts=pts-seen.pts;if(typeof seen.rank==="number"&&rank)dRank=seen.rank-rank;}
+    if(rank!=null&&!state._ydWrote){state._ydWrote=true;await setJSON("wc:ydSeen",{pts:pts,rank:rank,t:Date.now()},false);}
+    let mv=null;try{mv=await overnightMovers();}catch(e){}
+    state._yd={rank:rank,pts:pts,dPts:dPts,dRank:dRank,movers:mv,total:st.length};
+  }catch(e){}
+  renderYourDay();
+}
+function renderYourDay(){
+  const host=document.getElementById("yourday");if(!host)return;
+  if(!state.player||state.demo){host.style.display="none";host.innerHTML="";return;}
+  const d=state._yd||{};
+  const name=esc(((state.player.name||"there").trim().split(/\s+/)[0])||"there");
+  const gp=groupProgress(),rad=locksTodayUnpicked(),rq=revealQueue().length,nu=nextUnpicked();
+  let h='<div class="yd-top"><div class="yd-hi">'+ydGreeting()+', '+name+'</div>'+
+    (d.rank?('<div class="yd-rank">#'+d.rank+(d.total>1?(' <span>of '+d.total+'</span>'):'')+'</div>'):'')+'</div>';
+  const bits=[];
+  if(d.dPts>0)bits.push('+'+d.dPts+' pts');
+  if(d.dRank>0)bits.push('\u25b2 '+d.dRank+' place'+(d.dRank===1?'':'s'));
+  if(bits.length)h+='<div class="yd-delta">Since your last visit: <b class="up">'+bits.join('</b> \u00b7 <b class="up">')+'</b></div>';
+  if(d.movers){
+    if(d.movers.passedBy&&d.movers.passedBy.length)
+      h+='<div class="yd-mv down">\u26a0 '+esc(d.movers.passedBy.slice(0,2).join(", "))+(d.movers.passedBy.length>2?(" +"+(d.movers.passedBy.length-2)+" more"):"")+' passed you overnight</div>';
+    if(d.movers.overtook&&d.movers.overtook.length)
+      h+='<div class="yd-mv up">\u25b2 You overtook '+esc(d.movers.overtook.slice(0,2).join(", "))+(d.movers.overtook.length>2?(" +"+(d.movers.overtook.length-2)+" more"):"")+' overnight</div>';
+  }
+  h+='<div class="yd-rows">';
+  if(rq>0)h+='<button class="yd-row yd-rev" onclick="openReveal()"><span>\ud83c\udf81 '+rq+' result'+(rq===1?'':'s')+' to reveal</span><span class="yd-go">Open \u2192</span></button>';
+  if(rad.n>0)h+='<button class="yd-row yd-radar" onclick="jumpToNext()"><span>\u23f3 '+rad.n+' lock today \u00b7 +'+rad.pts+' unclaimed</span><span class="yd-go">Pick \u2192</span></button>';
+  else if(nu)h+='<button class="yd-row yd-next" onclick="jumpToNext()"><span>Your next unpicked match</span><span class="yd-go">Go \u2192</span></button>';
+  h+='</div>';
+  const pct=gp.tot?Math.round(gp.pc/gp.tot*100):0;
+  h+='<div class="yd-meter"><div class="yd-mtop"><span>Group stage picks</span><span><b>'+gp.pc+'</b> / '+gp.tot+'</span></div><div class="yd-bar"><i style="width:'+pct+'%"></i></div></div>';
+  host.innerHTML=h;host.style.display="block";
+  try{updateRevealBadge();}catch(e){}
+}
+function updateRevealBadge(){
+  const n=(state.player&&!state.demo)?revealQueue().length:0;
+  const btn=document.getElementById("nav-matches");if(!btn)return;
+  let b=document.getElementById("nav-rev-badge");
+  if(n>0){if(!b){b=document.createElement("span");b.id="nav-rev-badge";b.className="nav-badge";btn.appendChild(b);}b.textContent=n>9?"9+":(""+n);}
+  else if(b){b.remove();}
+}
+
+/* ===== UX wave 5: swipe combo meter + add-to-home-screen install coach ===== */
+function swComboHide(){var c=document.getElementById("sw-combo");if(c)c.classList.remove("show");}
+function comboBump(){
+  SW.combo=(SW.combo||0)+1;
+  if(SW.combo>=2){
+    var chip=document.getElementById("sw-combo");
+    if(!chip){chip=document.createElement("div");chip.id="sw-combo";chip.className="sw-combo";document.body.appendChild(chip);}
+    chip.textContent="🔥 "+SW.combo+" in a row";
+    chip.classList.remove("pop");void chip.offsetWidth;chip.classList.add("pop","show");
+    clearTimeout(SW._ct);SW._ct=setTimeout(function(){chip.classList.remove("show");},950);
+  }
+  try{if(typeof sndOn==="function"&&sndOn())tone(400+Math.min(SW.combo,12)*55,0,.05);}catch(e){}
+  if(SW.combo===5||SW.combo===10||SW.combo===20){
+    try{navigator.vibrate&&navigator.vibrate([15,30,15,30,45]);}catch(e){}
+    if(!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)){try{confettiBurst();}catch(e){}}
+  }
+}
+var DEFERRED_INSTALL=null;
+try{window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();DEFERRED_INSTALL=e;try{maybeInstallCoach();}catch(x){}});}catch(e){}
+function isStandalone(){try{return (window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;}catch(e){return false;}}
+function isIOS(){try{return /iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;}catch(e){return false;}}
+function dismissInstall(){var b=document.getElementById("install-coach");if(b)b.remove();try{localStorage.setItem("wc:installSeen","1");}catch(e){}}
+async function doInstall(){try{if(DEFERRED_INSTALL){DEFERRED_INSTALL.prompt();await DEFERRED_INSTALL.userChoice;DEFERRED_INSTALL=null;}}catch(e){}dismissInstall();}
+function showInstallCoach(kind){
+  if(document.getElementById("install-coach"))return;
+  var msg=kind==="ios"
+    ? 'Add Staff Challenge to your home screen — tap <b>Share</b> then <b>Add to Home Screen</b> for one-tap access and reminders.'
+    : 'Add Staff Challenge to your home screen for one-tap access and match-day reminders.';
+  var b=document.createElement("div");b.id="install-coach";b.className="install-coach";
+  b.innerHTML='<div class="ic-row"><div class="ic-ic">🏆</div><div class="ic-msg">'+msg+'</div><button class="ic-x" aria-label="Dismiss" onclick="dismissInstall()">✕</button></div>'+
+    (kind==="android"?'<button class="ic-cta" onclick="doInstall()">Add to home screen</button>':'<button class="ic-cta ghost" onclick="dismissInstall()">Got it</button>');
+  document.body.appendChild(b);
+  requestAnimationFrame(function(){b.classList.add("show");});
+}
+function maybeInstallCoach(force){
+  try{
+    if(!state.player||state.demo)return;
+    if(isStandalone())return;
+    if(!force&&localStorage.getItem("wc:installSeen")==="1")return;
+    if(DEFERRED_INSTALL)showInstallCoach("android");
+    else if(isIOS())showInstallCoach("ios");
+  }catch(e){}
+}
+
 /* ===== drag-down-to-close: grabber + header on every overlay ===== */
 function armSheet(panelSel,fn){
   const p=document.querySelector(panelSel);if(!p||!window.PointerEvent)return;
@@ -3173,9 +3359,9 @@ armSheet("#reveal",()=>closeReveal());
 armSheet("#faqov",()=>closeFaq());
 
 /* ===== quick-pick swipe mode ===== */
-const SW={list:[],i:0,open:false,peek:false};
+const SW={list:[],i:0,open:false,peek:false,combo:0};
 function openSwipe(){
-  SW.list=swipeQueue();SW.i=0;
+  SW.list=swipeQueue();SW.i=0;SW.combo=0;
   if(!SW.list.length){toast("All picked \u2014 nothing left \u26a1");return;}
   SW.open=true;SW.peek=true;
   document.getElementById("swipe").style.display="flex";
@@ -3184,7 +3370,7 @@ function openSwipe(){
   renderSwipeCard();
 }
 function closeSwipe(){
-  SW.open=false;
+  SW.open=false;SW.combo=0;try{swComboHide();}catch(e){}
   document.getElementById("swipe").style.display="none";
   document.body.style.overflow="";
   document.removeEventListener("keydown",swKey);
@@ -3235,13 +3421,15 @@ function renderSwipeCard(){
 function swipeCommit(dir){
   const m=swCur();if(!m)return;
   const card=document.getElementById("sw-card");
-  if(m.kn){if(dir==="D")return swipeSkip();pickWinner(m.id,dir==="H"?m.home.n:m.away.n);SW.i++;flyOff(card,dir,renderSwipeCard);return;}
+  if(m.kn){if(dir==="D")return swipeSkip();pickWinner(m.id,dir==="H"?m.home.n:m.away.n);SW.i++;comboBump();flyOff(card,dir,renderSwipeCard);return;}
   pickOutcome(m.id,dir);
   SW.i++;
+  comboBump();
   flyOff(card,dir,renderSwipeCard);
 }
 function swipeSkip(){
   const m=swCur();if(!m)return;
+  SW.combo=0;swComboHide();
   SW.list.push(SW.list.splice(SW.i,1)[0]);
   flyOff(document.getElementById("sw-card"),"U",renderSwipeCard);
 }
@@ -3610,9 +3798,42 @@ async function seedSandbox(){
   });
   lsSet("wc:seeded","v1");
 }
+/* ===== demo bootstrap: open the app with #demo to preview the "Your Day" card
+   pre-filled (returning mid-tournament player). Sandbox-only, runs once. ===== */
+function demoSeedYourDay(){
+  try{
+    if(!/(?:[#&?])demo\b/i.test((location.hash||"")+"&"+(location.search||"")))return false;
+    if(lsGet("wc:demoYD")==="1")return false;
+    var results=state.results||{};
+    var today=new Date(Date.now()+CLOCK_OFFSET+3*36e5).toISOString().slice(0,10);
+    var preds={},settled=0,idx=0;
+    FIXTURES.forEach(function(f){
+      if(f.kn)return;idx++;
+      var r=results[f.id];
+      var koD=new Date(new Date(f.ko).getTime()+3*36e5).toISOString().slice(0,10);
+      if(r){var ro=r.h>r.a?"H":r.h<r.a?"A":"D";var p={o:ro};if(settled%2===0){p.h=r.h;p.a=r.a;}preds[f.id]=p;settled++;return;}
+      if(koD===today)return;
+      if(idx%6===0)return;
+      preds[f.id]={o:["H","D","A"][idx%3]};
+    });
+    var slug="wc_demo_you";
+    var me={slug:slug,name:"You (demo)",ig:slug,dept:"Group Communications",country:"Qatar",joinedAt:Date.parse("2026-06-01T08:00:00Z"),predictions:preds,champ:"Brazil"};
+    lsSet("wc:player:"+slug,JSON.stringify(me));
+    lsSet("wc:me",JSON.stringify(slug));
+    lsSet("wc:pin","1234");
+    try{localStorage.removeItem("wc:revealed");}catch(e){}
+    lsSet("wc:ydSeen",JSON.stringify({pts:2,rank:12,t:Date.now()-864e5}));
+    var slugs=Object.keys(localStorage).filter(function(k){return k.indexOf("wc:player:")===0;}).map(function(k){return k.slice(10);});
+    var ranks={},rk=1;slugs.forEach(function(s){if(s===slug)return;ranks[s]=rk;rk++;if(rk===12)rk++;});ranks[slug]=12;
+    lsSet("wc:ranksnap",JSON.stringify({ranks:ranks,t:Date.now()-12*36e5}));
+    lsSet("wc:demoYD","1");
+    return true;
+  }catch(e){return false;}
+}
 (async function init(){
   await seedSandbox();
   state.results=await getJSON("wc:results",true)||{};
+  try{demoSeedYourDay();}catch(e){}
   state.kteams=await getJSON("wc:kteams",true)||{};
   state.org=false; /* org actions are server-verified per call — unlock fresh each load */
   const me=await getJSON("wc:me",false);
@@ -3623,7 +3844,8 @@ async function seedSandbox(){
     document.getElementById("countdown").style.display="flex";
     const h=(location.hash||"").slice(1);
     updateChip();go(["matches","leaderboard","me"].indexOf(h)>=0?h:"matches");
-    if(!openReveal())welcomeDelta();
+    buildYourDay();openReveal();
+    setTimeout(function(){try{maybeInstallCoach();}catch(e){}},2500);
   }else{go("join");}
   renderPulse();setInterval(renderPulse,30000);
   fetchLive();setInterval(liveTick,60000);
