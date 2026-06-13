@@ -1,0 +1,3 @@
+# local backups / scratch — never push
+*.bak
+index.html.bak
