@@ -1,0 +1,431 @@
+diff --git a/index.html b/index.html
+index cce4461..51b1536 100644
+--- a/index.html
++++ b/index.html
+@@ -219,9 +219,9 @@
+   .final-score{font-family:var(--font-d);font-size:30px;letter-spacing:1px;color:var(--gold-bright)}
+   .final-tag{font-size:8.5px;letter-spacing:1.5px;color:var(--ok);font-weight:800;text-transform:uppercase}
+ 
+-  .picks{display:grid;grid-template-columns:1fr .8fr 1fr;gap:7px}
++  .picks{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+   .pick{border:1px solid var(--line);background:rgba(0,0,0,.18);color:var(--cream);border-radius:13px;
+-    padding:13px 6px;min-height:46px;touch-action:manipulation;font-weight:800;font-size:12px;cursor:pointer;transition:.16s;display:flex;align-items:center;justify-content:center;gap:5px;position:relative}
++    padding:14px 8px;min-height:52px;touch-action:manipulation;font-weight:800;font-size:12.5px;cursor:pointer;transition:.16s;display:flex;align-items:center;justify-content:center;gap:5px;position:relative}
+   @media(hover:hover){.pick:hover:not(:disabled){border-color:var(--gold);transform:translateY(-1px)}}
+   .pick:active:not(:disabled){transform:scale(.97)}
+   .pick.sel{background:linear-gradient(125deg,var(--gold-deep),var(--gold));border-color:transparent;color:#181106;
+@@ -229,8 +229,8 @@
+   .pick.sel::after{content:"✓";position:absolute;top:-7px;right:-7px;width:18px;height:18px;border-radius:50%;
+     background:#15120a;color:var(--gold-bright);font-size:11px;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.4);animation:popin .28s cubic-bezier(.34,1.56,.64,1)}
+   .pick:disabled{opacity:.55;cursor:default}
+-  .pick .mini{font-size:15px}
+-  .pick.draw{font-size:11px;letter-spacing:.5px}
++  .pick .mini{font-size:18px}
++  .pick.draw{font-size:12px;letter-spacing:.6px}
+   /* reward layer: pop+glow on tap, stakes float, completion glow */
+   .pick.pop{animation:pickpop .42s cubic-bezier(.34,1.7,.5,1)}
+   .pick.pop::after{animation:popin .38s cubic-bezier(.34,2,.5,1)}
+@@ -610,6 +610,43 @@
+   .me-fun{margin:14px auto 2px;font-size:11.5px;color:var(--muted);font-weight:700;line-height:2;letter-spacing:.2px}
+   .me-fun b{color:var(--gold)}
+   .me-fun .fl-img{width:15px;height:11px;border-radius:2px;vertical-align:-1px}
++  /* ===== UX wave 4: "Your Day" home card + reveal badge ===== */
++  .yourday{margin:14px 0 6px;background:linear-gradient(100deg,rgba(180,151,89,.14),rgba(255,255,255,.045));border:1px solid var(--line);border-radius:18px;padding:14px 15px;animation:rise .5s both}
++  .yd-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
++  .yd-hi{font-family:var(--font-d);font-size:20px;letter-spacing:.4px;color:var(--cream)}
++  .yd-rank{font-family:var(--font-d);font-size:22px;background:linear-gradient(var(--gold-bright),var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
++  .yd-rank span{font-family:var(--font-b);font-size:11px;color:var(--faint);-webkit-text-fill-color:var(--faint)}
++  .yd-delta{margin-top:7px;font-size:13px;color:var(--muted);font-weight:600}
++  .yd-delta .up{color:var(--ok)}
++  .yd-mv{margin-top:7px;font-size:12.5px;font-weight:700;border-radius:10px;padding:7px 10px;line-height:1.35}
++  .yd-mv.up{color:var(--ok);background:rgba(61,220,151,.10)}
++  .yd-mv.down{color:#ffd27a;background:rgba(239,179,64,.10)}
++  .yd-rows{display:flex;flex-direction:column;gap:7px;margin-top:11px}
++  .yd-row{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--cream);font-size:13.5px;font-weight:700;cursor:pointer;min-height:48px;transition:.15s}
++  .yd-row:hover{border-color:var(--gold);background:var(--glass-2)}
++  .yd-row.yd-rev{border-color:rgba(227,179,65,.5);background:linear-gradient(100deg,rgba(227,179,65,.16),rgba(255,255,255,.05))}
++  .yd-row.yd-radar{border-color:rgba(239,51,64,.45)}
++  .yd-go{font-size:12px;color:var(--gold);font-weight:800;white-space:nowrap}
++  nav.bottom .navbtn{position:relative}
++  .nav-badge{position:absolute;top:5px;left:calc(50% + 6px);min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:var(--magenta);color:#fff;font-size:10px;font-weight:800;line-height:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.45)}
++  /* ===== UX wave 5: swipe combo + install coach ===== */
++  .sw-combo{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 60px);transform:translateX(-50%) scale(.8);z-index:9990;background:linear-gradient(100deg,rgba(239,51,64,.94),rgba(255,94,87,.94));color:#fff;font-weight:800;font-size:14px;padding:7px 15px;border-radius:99px;box-shadow:0 5px 20px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .18s ease,transform .18s ease}
++  .sw-combo.show{opacity:1;transform:translateX(-50%) scale(1)}
++  .sw-combo.pop{animation:scombo .42s ease}
++  @keyframes scombo{0%{transform:translateX(-50%) scale(.7)}45%{transform:translateX(-50%) scale(1.16)}100%{transform:translateX(-50%) scale(1)}}
++  .install-coach{position:fixed;left:12px;right:12px;bottom:calc(var(--nav-h) + 12px + env(safe-area-inset-bottom));z-index:200;max-width:736px;margin:0 auto;background:linear-gradient(100deg,rgba(180,151,89,.18),rgba(18,18,22,.98));border:1px solid var(--gold-deep);border-radius:16px;padding:13px 14px;box-shadow:0 12px 32px rgba(0,0,0,.5);transform:translateY(18px);opacity:0;transition:.28s ease}
++  .install-coach.show{transform:none;opacity:1}
++  .install-coach .ic-row{display:flex;align-items:flex-start;gap:11px}
++  .install-coach .ic-ic{font-size:22px;line-height:1.1}
++  .install-coach .ic-msg{flex:1;font-size:13px;color:var(--cream);font-weight:600;line-height:1.45}
++  .install-coach .ic-msg b{color:var(--gold-bright);font-weight:800}
++  .install-coach .ic-x{background:none;border:0;color:var(--faint);font-size:15px;cursor:pointer;padding:2px 4px;flex-shrink:0;line-height:1}
++  .install-coach .ic-cta{margin-top:10px;width:100%;background:linear-gradient(100deg,var(--gold-deep),var(--gold));color:#181106;border:0;border-radius:11px;padding:11px;font-weight:800;font-size:13.5px;cursor:pointer;min-height:44px}
++  .install-coach .ic-cta.ghost{background:var(--glass);color:var(--cream);border:1px solid var(--line)}
++  /* ===== UX wave 7: offline save-state indicator ===== */
++  .savestate{margin-top:9px;font-size:11.5px;font-weight:700;border-radius:10px;padding:7px 11px;line-height:1.35}
++  .savestate.off{color:#ffd27a;background:rgba(239,179,64,.12);border:1px solid rgba(239,179,64,.3)}
++  .savestate.pending{color:var(--muted);background:var(--glass);border:1px solid var(--line)}
+ </style>
+ </head>
+ <body>
+@@ -717,6 +754,7 @@
+   <!-- MATCHES -->
+   <section class="view" id="view-matches">
+     <div class="sec-title"><h2>Matches</h2><div class="tag" id="match-tag">104 fixtures</div></div>
++    <div id="yourday" class="yourday" style="display:none"></div>
+     <div id="pulsebar" class="pulsebar" style="display:none" onclick="location.href='watch.html'" title="Where to watch" role="link"></div>
+     <div id="daybanner" class="daybanner" style="display:none"></div>
+     <div id="daily-hub"></div>
+@@ -726,6 +764,7 @@
+     <div class="progress">
+       <div class="top"><span>Predictions<span id="champ-tok" role="button" onclick="go('me')"></span></span><span><b id="pred-count">0</b> / <span id="pred-total">72</span></span></div>
+       <div class="bar"><i id="pred-bar" style="width:0%"></i></div>
++      <div id="savestate" class="savestate" style="display:none"></div>
+       <button id="qpbtn" class="qpbtn" style="display:none" onclick="openSwipe()">⚡ <span class="qp-full">Swipe to pick · </span><span id="qp-left">0</span><span class="qp-full"> left</span></button>
+       <div class="rules"><b>+3</b> result &nbsp;·&nbsp; <b>+2</b> exact bonus &nbsp;·&nbsp; knockouts <b>+4→+10</b> &nbsp;·&nbsp; 🏆 champion <b>+25</b> &nbsp;·&nbsp; ties break on <b>most predictions</b></div>
+       <button class="ptbtn" onclick="togglePts(this)">How do points work? ▾</button>
+@@ -1561,6 +1600,7 @@ function meChampLine(){
+ function renderMatches(){
+   if(!state.player)return;
+   renderChampCard();
++  try{renderYourDay();}catch(e){}
+   try{renderDailyHub();}catch(e){}
+   const c=predCount(),tot=predTotal();
+   document.getElementById("pred-count").textContent=c;
+@@ -1873,7 +1913,12 @@ function saveScore(id,h,a){
+   queueSave();
+   if(P.h!=null&&P.a!=null){toast("Score saved · bonus armed ⚡");rewardPick(id);}
+ }
+-async function persistPlayer(){const ok=await savePicksRPC();if(!ok&&lsGet("wc:pin")){toast("⚠️ Connection hiccup — retrying your save automatically…");setTimeout(queueSave,10000);}}
++async function persistPlayer(){
++  markOutbox();
++  const ok=await savePicksRPC();
++  if(ok){clearOutbox();setOfflineUI(false);}
++  else if(lsGet("wc:pin")){setOfflineUI(true);toast("⚠️ Connection hiccup — your picks are saved here and will sync automatically…");setTimeout(queueSave,10000);}
++}
+ 
+ let LB_SHOWN=100;
+ /* Rank order everywhere: points, then most predictions, then exact, then correct */
+@@ -2069,6 +2114,7 @@ async function rivalHTML(s,st){
+       inner='<div class="rv-t">\ud83c\udfaf Rival watch</div>'+
+         '<div class="rv-line"><b>You '+myPts+'</b><span class="rv-vs">VS</span><b>'+rv.pts+' '+esc(rv.name)+'</b></div>'+
+         '<div class="rv-sub">'+(diff>0?("You lead by "+diff+" pt"+(diff===1?"":"s")):(diff<0?(esc(rv.name)+" leads by "+(-diff)+" pt"+(diff===-1?"":"s")):"Dead level"))+' \u00b7 they\u2019re #'+(idx+1)+'</div>'+
++        '<button class="btn btn-ghost btn-sm" style="margin:8px auto 0;display:block" onclick="shareCard()">⚔ Share the challenge</button>'+
+         '<button class="rv-x" onclick="clearRival()">change rival</button>';
+     }else inner='<button class="btn btn-ghost btn-sm" style="margin:0 auto" onclick="pickRival()">\ud83c\udfaf Pick a rival</button><div id="rival-slot"></div>';
+   }else inner='<button class="btn btn-ghost btn-sm" style="margin:0 auto" onclick="pickRival()">\ud83c\udfaf Pick a rival</button><div id="rival-slot"></div>';
+@@ -2569,18 +2615,34 @@ async function shareCard(){
+       x.strokeStyle="rgba(244,238,227,.14)";x.lineWidth=2;roundRect(x,cx-125,930,250,170,22);x.stroke();
+       x.fillStyle="#e3d3a3";x.font="400 84px Anton,'Arial Narrow',sans-serif";x.fillText(String(p[0]),cx,1018);
+       x.fillStyle="rgba(244,238,227,.5)";x.font="700 22px 'Hanken Grotesk',sans-serif";x.fillText(p[1],cx,1066);});
+-    const flin=shareFunLine();
+-    if(flin){x.fillStyle="rgba(227,211,163,.85)";x.font="600 28px 'Hanken Grotesk',sans-serif";
+-      x.fillText("\u2728 "+flin+" \u2728",W/2,1158);}
+-    x.fillStyle="#b49759";x.font="700 30px 'Hanken Grotesk',sans-serif";
+-    x.fillText("Think you can beat me? \u2192 staffchallenge26.com",W/2,1220);
++    var shareText="My World Cup 26 standing \u2014 come beat me: https://staffchallenge26.com";
++    var rivalSlug=null;try{rivalSlug=await getJSON("wc:rival",false);}catch(e){}
++    rivalSlug=rivalSlug&&(rivalSlug.slug||rivalSlug);
++    var rv=null,rrank=null;
++    if(rivalSlug&&typeof rivalSlug==="string"){rv=st.find(function(r){return r.slug===rivalSlug;})||null;if(rv)st.forEach(function(r,i){if(r.slug===rivalSlug&&rrank===null)rrank=i+1;});}
++    if(rv){
++      var myPts=(st.find(function(r){return r.slug===state.meSlug;})||{}).pts; if(myPts==null)myPts=sc.pts;
++      var gap=myPts-rv.pts;
++      var verdict=gap>0?("Leading "+rv.name+" by "+gap+" \u2014 catch me if you can!"):(gap<0?("Chasing "+rv.name+" \u2014 "+(-gap)+" behind. Game on."):("Dead level with "+rv.name+" \u2014 it's on."));
++      x.fillStyle="rgba(244,238,227,.5)";x.font="700 24px 'Hanken Grotesk',sans-serif";x.fillText("HEAD TO HEAD",W/2,1126);
++      x.fillStyle="#f4eee3";x.font="800 30px 'Hanken Grotesk',sans-serif";x.fillText("You "+myPts+"    vs    "+rv.name+" "+rv.pts,W/2,1164);
++      x.fillStyle="rgba(227,211,163,.92)";x.font="700 25px 'Hanken Grotesk',sans-serif";x.fillText(verdict,W/2,1202);
++      x.fillStyle="#b49759";x.font="700 28px 'Hanken Grotesk',sans-serif";x.fillText("\u2192 staffchallenge26.com",W/2,1240);
++      shareText=verdict+" \u2014 https://staffchallenge26.com";
++    }else{
++      var flin=shareFunLine();
++      if(flin){x.fillStyle="rgba(227,211,163,.85)";x.font="600 28px 'Hanken Grotesk',sans-serif";
++        x.fillText("\u2728 "+flin+" \u2728",W/2,1158);}
++      x.fillStyle="#b49759";x.font="700 30px 'Hanken Grotesk',sans-serif";
++      x.fillText("Think you can beat me? \u2192 staffchallenge26.com",W/2,1220);
++    }
+     x.fillStyle="rgba(244,238,227,.35)";x.font="600 22px 'Hanken Grotesk',sans-serif";
+     x.fillText("QNB Staff World Cup 2026 \u00b7 11 June \u2013 19 July",W/2,1266);
+     c.toBlob(async b=>{
+       if(!b){toast("Couldn\u2019t build the card");return;}
+       const f=new File([b],"matchday-card.png",{type:"image/png"});
+       if(navigator.canShare&&navigator.canShare({files:[f]})){
+-        try{await navigator.share({files:[f],title:"Staff Challenge",text:"My World Cup 26 standing \u2014 come beat me: https://staffchallenge26.com"});return;}catch(e){if(e&&e.name==="AbortError")return;}
++        try{await navigator.share({files:[f],title:"Staff Challenge",text:shareText});return;}catch(e){if(e&&e.name==="AbortError")return;}
+       }
+       const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="matchday-card.png";a.click();
+       setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Card saved \u2014 share it on the group \ud83d\udce4");
+@@ -2873,10 +2935,11 @@ const FAQ_ITEMS=[
+  {q:"How do points work?",a:"Group matches: 3 points for the right result, +2 for the exact score \u2014 5 max. Knockouts pay more each round: Round of 32 = 4 \u00b7 Round of 16 = 5 \u00b7 Quarterfinals = 6 \u00b7 Semifinals = 8 \u00b7 Third place = 6 \u00b7 the Final = 10."},
+  {q:"When do picks lock?",a:"At kickoff, match by match. Until then edit freely \u2014 changes save as you type."},
+  {q:"I got the score right but only received 3 points?",a:"Exact-score points need both number boxes filled before kickoff. If one was empty, only your result pick counted."},
+- {q:"When do results and points appear?",a:"Scores post and points update about 30 minutes after the final whistle \u2014 automatically. Next time you open the app, the morning reveal replays how your picks did."},
+- {q:"What do the \u25b2\u25bc arrows mean?",a:"Your movement since yesterday\u2019s standings snapshot. Big jumps in week one are normal \u2014 everyone starts level."},
+- {q:"What\u2019s a rival?",a:"Pick anyone from the dropdown in your Me tab. During live matches the pulse bar shows both your provisional points, head to head."},
+- {q:"How are ties broken?",a:"Full tiebreaker rules will be announced before the knockouts begin \u2014 watch this space."},
++ {q:"What\u2019s the card at the top when I open the app?",a:"Your day at a glance: your current rank, what you gained since your last visit, and anything that still needs a pick before it locks today \u2014 the fastest way to see what changed while you were away."},
++ {q:"When do results and points appear?",a:"Scores post and points update about 30 minutes after the final whistle \u2014 automatically. When results land, a badge on the Matches tab shows how many are waiting; tap it (or \u201cresults to reveal\u201d on your home card) and the reveal plays how each pick did."}, {q:"What do the \u25b2\u25bc arrows mean?",a:"Your movement since yesterday\u2019s standings snapshot. Your home card also calls out anyone you passed (or who passed you) overnight. Big jumps in week one are normal \u2014 everyone starts level."},
++ {q:"What\u2019s a rival?",a:"Pick anyone from the dropdown in your Me tab. During live matches the pulse bar shows both your provisional points head to head \u2014 and you can share a \u201ccatch me\u201d card to challenge them."},
++ {q:"What if I lose signal while picking?",a:"Your picks are safe \u2014 any pick you make without signal is saved on your phone and syncs automatically the moment you are back online, with a small note while it happens."},
++ {q:"How do I add it to my phone\u2019s home screen?",a:"On iPhone: tap the Share button in Safari, then \u201cAdd to Home Screen.\u201d On Android: tap \u201cAdd to home screen\u201d when the app offers it \u2014 it then opens like a normal app, handy for a quick daily check."}, {q:"How are ties broken?",a:"Full tiebreaker rules will be announced before the knockouts begin \u2014 watch this space."},
+  {q:"Is my Instagram handle visible to others?",a:"Sign-in only. Other players see your display name and department; handles are never shown on the leaderboard."},
+  {q:"Wrong name, lost access, something odd?",a:"Message Internal Communications and we\u2019ll sort it."},
+  {q:"Who built this?",a:"Internal Communications \u2014 fuelled by lots and lots of coffee."}
+@@ -2970,6 +3033,7 @@ function closeReveal(){
+   RV.open=false;clearTimeout(RV.timer);
+   document.getElementById("reveal").style.display="none";
+   document.body.style.overflow="";
++  try{updateRevealBadge();renderYourDay();}catch(e){}
+ }
+ function renderRevealCard(){
+   const m=RV.q[RV.i];
+@@ -3154,6 +3218,155 @@ function renderDayBanner(){
+   el.style.display="block";
+ }
+ 
++/* ===== UX wave 4: "Your Day" home card + reveal badge ===== */
++function ydGreeting(){try{const h=new Date(Date.now()+CLOCK_OFFSET+3*36e5).getUTCHours();return h<12?"Good morning":(h<18?"Good afternoon":"Good evening");}catch(e){return "Welcome back";}}
++function locksTodayUnpicked(){
++  const now=Date.now()+CLOCK_OFFSET;const doha=function(t){return new Date(t+3*36e5).toISOString().slice(0,10);};const today=doha(now);
++  let n=0,pts=0;
++  FIXTURES.forEach(function(m){
++    const pickable=m.kn?koReady(m):true;if(!pickable)return;
++    const lt=lockTs(m);if(lt<=now)return;if(doha(lt)!==today)return;
++    const p=state.player.predictions[m.id]||{};if(p.o||p.w)return;
++    n++;pts+=m.kn?koPts(m):3;
++  });
++  return {n:n,pts:pts};
++}
++async function overnightMovers(){
++  try{
++    const snap=await rankSnap();if(!snap||!snap.ranks)return null;
++    const st=(await fetchStandings()).slice().sort(cmpSt);
++    const meThen=snap.ranks[state.meSlug];let meNow=null;
++    st.forEach(function(r,i){if(r.slug===state.meSlug)meNow=i+1;});
++    if(meNow==null||meThen==null)return null;
++    const passedBy=[],overtook=[];
++    st.forEach(function(r,i){
++      if(r.slug===state.meSlug)return;const then=snap.ranks[r.slug];if(then==null)return;const now=i+1;
++      if(then>meThen&&now<meNow)passedBy.push(r.name||"Someone");
++      if(then<meThen&&now>meNow)overtook.push(r.name||"Someone");
++    });
++    return {passedBy:passedBy,overtook:overtook};
++  }catch(e){return null;}
++}
++async function buildYourDay(){
++  if(!state.player||state.demo)return;
++  try{
++    const st=(await fetchStandings()).slice().sort(cmpSt);
++    let rank=null,pts=0;st.forEach(function(r,i){if(r.slug===state.meSlug&&rank===null){rank=i+1;pts=r.pts|0;}});
++    const seen=await getJSON("wc:ydSeen",false);
++    let dPts=0,dRank=0;
++    if(seen&&typeof seen.pts==="number"){dPts=pts-seen.pts;if(typeof seen.rank==="number"&&rank)dRank=seen.rank-rank;}
++    if(rank!=null&&!state._ydWrote){state._ydWrote=true;await setJSON("wc:ydSeen",{pts:pts,rank:rank,t:Date.now()},false);}
++    let mv=null;try{mv=await overnightMovers();}catch(e){}
++    state._yd={rank:rank,pts:pts,dPts:dPts,dRank:dRank,movers:mv,total:st.length};
++  }catch(e){}
++  renderYourDay();
++}
++function renderYourDay(){
++  const host=document.getElementById("yourday");if(!host)return;
++  if(!state.player||state.demo){host.style.display="none";host.innerHTML="";return;}
++  const d=state._yd||{};
++  const name=esc(((state.player.name||"there").trim().split(/\s+/)[0])||"there");
++  const rad=locksTodayUnpicked(),rq=revealQueue().length,nu=nextUnpicked();
++  let h='<div class="yd-top"><div class="yd-hi">'+ydGreeting()+', '+name+'</div>'+
++    (d.rank?('<div class="yd-rank">#'+d.rank+(d.total>1?(' <span>of '+d.total+'</span>'):'')+'</div>'):'')+'</div>';
++  const bits=[];
++  if(d.dPts>0)bits.push('+'+d.dPts+' pts');
++  if(d.dRank>0)bits.push('\u25b2 '+d.dRank+' place'+(d.dRank===1?'':'s'));
++  if(bits.length)h+='<div class="yd-delta">Since your last visit: <b class="up">'+bits.join('</b> \u00b7 <b class="up">')+'</b></div>';
++  if(d.movers){
++    if(d.movers.passedBy&&d.movers.passedBy.length)
++      h+='<div class="yd-mv down">\u26a0 '+esc(d.movers.passedBy.slice(0,2).join(", "))+(d.movers.passedBy.length>2?(" +"+(d.movers.passedBy.length-2)+" more"):"")+' passed you overnight</div>';
++    if(d.movers.overtook&&d.movers.overtook.length)
++      h+='<div class="yd-mv up">\u25b2 You overtook '+esc(d.movers.overtook.slice(0,2).join(", "))+(d.movers.overtook.length>2?(" +"+(d.movers.overtook.length-2)+" more"):"")+' overnight</div>';
++  }
++  h+='<div class="yd-rows">';
++  if(rq>0)h+='<button class="yd-row yd-rev" onclick="openReveal()"><span>\ud83c\udf81 '+rq+' result'+(rq===1?'':'s')+' to reveal</span><span class="yd-go">Open \u2192</span></button>';
++  if(rad.n>0)h+='<button class="yd-row yd-radar" onclick="jumpToNext()"><span>\u23f3 '+rad.n+' lock today \u00b7 +'+rad.pts+' unclaimed</span><span class="yd-go">Pick \u2192</span></button>';
++  else if(nu)h+='<button class="yd-row yd-next" onclick="jumpToNext()"><span>Your next unpicked match</span><span class="yd-go">Go \u2192</span></button>';
++  h+='</div>';
++  host.innerHTML=h;host.style.display="block";
++  try{updateRevealBadge();}catch(e){}
++}
++function updateRevealBadge(){
++  const n=(state.player&&!state.demo)?revealQueue().length:0;
++  const btn=document.getElementById("nav-matches");if(!btn)return;
++  let b=document.getElementById("nav-rev-badge");
++  if(n>0){if(!b){b=document.createElement("span");b.id="nav-rev-badge";b.className="nav-badge";btn.appendChild(b);}b.textContent=n>9?"9+":(""+n);}
++  else if(b){b.remove();}
++}
++
++/* ===== UX wave 5: swipe combo meter + add-to-home-screen install coach ===== */
++function swComboHide(){var c=document.getElementById("sw-combo");if(c)c.classList.remove("show");}
++function comboBump(){
++  SW.combo=(SW.combo||0)+1;
++  if(SW.combo>=2){
++    var chip=document.getElementById("sw-combo");
++    if(!chip){chip=document.createElement("div");chip.id="sw-combo";chip.className="sw-combo";document.body.appendChild(chip);}
++    chip.textContent="🔥 "+SW.combo+" in a row";
++    chip.classList.remove("pop");void chip.offsetWidth;chip.classList.add("pop","show");
++    clearTimeout(SW._ct);SW._ct=setTimeout(function(){chip.classList.remove("show");},950);
++  }
++  try{if(typeof sndOn==="function"&&sndOn())tone(400+Math.min(SW.combo,12)*55,0,.05);}catch(e){}
++  if(SW.combo===5||SW.combo===10||SW.combo===20){
++    try{navigator.vibrate&&navigator.vibrate([15,30,15,30,45]);}catch(e){}
++    if(!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)){try{confettiBurst();}catch(e){}}
++  }
++}
++var DEFERRED_INSTALL=null;
++try{window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();DEFERRED_INSTALL=e;try{maybeInstallCoach();}catch(x){}});}catch(e){}
++function isStandalone(){try{return (window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;}catch(e){return false;}}
++function isIOS(){try{return /iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;}catch(e){return false;}}
++function dismissInstall(){var b=document.getElementById("install-coach");if(b)b.remove();try{localStorage.setItem("wc:installSeen","1");}catch(e){}}
++async function doInstall(){try{if(DEFERRED_INSTALL){DEFERRED_INSTALL.prompt();await DEFERRED_INSTALL.userChoice;DEFERRED_INSTALL=null;}}catch(e){}dismissInstall();}
++function showInstallCoach(kind){
++  if(document.getElementById("install-coach"))return;
++  var msg=kind==="ios"
++    ? 'Add Staff Challenge to your home screen — tap <b>Share</b> then <b>Add to Home Screen</b> for one-tap access and reminders.'
++    : 'Add Staff Challenge to your home screen for one-tap access and match-day reminders.';
++  var b=document.createElement("div");b.id="install-coach";b.className="install-coach";
++  b.innerHTML='<div class="ic-row"><div class="ic-ic">🏆</div><div class="ic-msg">'+msg+'</div><button class="ic-x" aria-label="Dismiss" onclick="dismissInstall()">✕</button></div>'+
++    (kind==="android"?'<button class="ic-cta" onclick="doInstall()">Add to home screen</button>':'<button class="ic-cta ghost" onclick="dismissInstall()">Got it</button>');
++  document.body.appendChild(b);
++  requestAnimationFrame(function(){b.classList.add("show");});
++}
++function maybeInstallCoach(force){
++  try{
++    if(!state.player||state.demo)return;
++    if(isStandalone())return;
++    if(!force&&localStorage.getItem("wc:installSeen")==="1")return;
++    if(DEFERRED_INSTALL)showInstallCoach("android");
++    else if(isIOS())showInstallCoach("ios");
++  }catch(e){}
++}
++
++/* ===== UX wave 7: offline support — service worker + pick outbox ===== */
++function markOutbox(){try{if(state.player&&state.meSlug)localStorage.setItem("wc:outbox",JSON.stringify({slug:state.meSlug,predictions:state.player.predictions||{},champ:state.player.champ,t:Date.now()}));}catch(e){}}
++function clearOutbox(){try{localStorage.removeItem("wc:outbox");}catch(e){}}
++function hasOutbox(){try{return !!localStorage.getItem("wc:outbox");}catch(e){return false;}}
++function setOfflineUI(pending){
++  var el=document.getElementById("savestate");if(!el)return;
++  var off=(typeof navigator!=="undefined"&&navigator.onLine===false);
++  if(off){el.textContent="⚡ Offline — your picks are saved on this phone and sync when you reconnect";el.className="savestate off";el.style.display="block";}
++  else if(pending&&hasOutbox()){el.textContent="⏳ Saving your latest picks…";el.className="savestate pending";el.style.display="block";}
++  else{el.style.display="none";}
++}
++function replayOutbox(){
++  try{
++    if(!hasOutbox()||!state.player)return;
++    var o=JSON.parse(localStorage.getItem("wc:outbox")||"null");
++    if(o&&o.slug===state.meSlug&&o.predictions){
++      var pr=state.player.predictions||(state.player.predictions={});
++      for(var id in o.predictions){var f=(typeof FXID!=="undefined")?FXID[id]:null;if(f&&typeof lockedM==="function"&&lockedM(f))continue;pr[id]=o.predictions[id];}
++      if(typeof o.champ!=="undefined"&&typeof champLocked==="function"&&!champLocked())state.player.champ=o.champ;
++    }
++    queueSave();
++  }catch(e){}
++}
++try{
++  window.addEventListener("online",function(){setOfflineUI(false);if(hasOutbox())queueSave();});
++  window.addEventListener("offline",function(){setOfflineUI(true);});
++}catch(e){}
++
+ /* ===== drag-down-to-close: grabber + header on every overlay ===== */
+ function armSheet(panelSel,fn){
+   const p=document.querySelector(panelSel);if(!p||!window.PointerEvent)return;
+@@ -3173,9 +3386,9 @@ armSheet("#reveal",()=>closeReveal());
+ armSheet("#faqov",()=>closeFaq());
+ 
+ /* ===== quick-pick swipe mode ===== */
+-const SW={list:[],i:0,open:false,peek:false};
++const SW={list:[],i:0,open:false,peek:false,combo:0};
+ function openSwipe(){
+-  SW.list=swipeQueue();SW.i=0;
++  SW.list=swipeQueue();SW.i=0;SW.combo=0;
+   if(!SW.list.length){toast("All picked \u2014 nothing left \u26a1");return;}
+   SW.open=true;SW.peek=true;
+   document.getElementById("swipe").style.display="flex";
+@@ -3184,7 +3397,7 @@ function openSwipe(){
+   renderSwipeCard();
+ }
+ function closeSwipe(){
+-  SW.open=false;
++  SW.open=false;SW.combo=0;try{swComboHide();}catch(e){}
+   document.getElementById("swipe").style.display="none";
+   document.body.style.overflow="";
+   document.removeEventListener("keydown",swKey);
+@@ -3235,13 +3448,15 @@ function renderSwipeCard(){
+ function swipeCommit(dir){
+   const m=swCur();if(!m)return;
+   const card=document.getElementById("sw-card");
+-  if(m.kn){if(dir==="D")return swipeSkip();pickWinner(m.id,dir==="H"?m.home.n:m.away.n);SW.i++;flyOff(card,dir,renderSwipeCard);return;}
++  if(m.kn){if(dir==="D")return swipeSkip();pickWinner(m.id,dir==="H"?m.home.n:m.away.n);SW.i++;comboBump();flyOff(card,dir,renderSwipeCard);return;}
+   pickOutcome(m.id,dir);
+   SW.i++;
++  comboBump();
+   flyOff(card,dir,renderSwipeCard);
+ }
+ function swipeSkip(){
+   const m=swCur();if(!m)return;
++  SW.combo=0;swComboHide();
+   SW.list.push(SW.list.splice(SW.i,1)[0]);
+   flyOff(document.getElementById("sw-card"),"U",renderSwipeCard);
+ }
+@@ -3610,9 +3825,42 @@ async function seedSandbox(){
+   });
+   lsSet("wc:seeded","v1");
+ }
++/* ===== demo bootstrap: open the app with #demo to preview the "Your Day" card
++   pre-filled (returning mid-tournament player). Sandbox-only, runs once. ===== */
++function demoSeedYourDay(){
++  try{
++    if(!/(?:[#&?])demo\b/i.test((location.hash||"")+"&"+(location.search||"")))return false;
++    if(lsGet("wc:demoYD")==="1")return false;
++    var results=state.results||{};
++    var today=new Date(Date.now()+CLOCK_OFFSET+3*36e5).toISOString().slice(0,10);
++    var preds={},settled=0,idx=0;
++    FIXTURES.forEach(function(f){
++      if(f.kn)return;idx++;
++      var r=results[f.id];
++      var koD=new Date(new Date(f.ko).getTime()+3*36e5).toISOString().slice(0,10);
++      if(r){var ro=r.h>r.a?"H":r.h<r.a?"A":"D";var p={o:ro};if(settled%2===0){p.h=r.h;p.a=r.a;}preds[f.id]=p;settled++;return;}
++      if(koD===today)return;
++      if(idx%6===0)return;
++      preds[f.id]={o:["H","D","A"][idx%3]};
++    });
++    var slug="wc_demo_you";
++    var me={slug:slug,name:"You (demo)",ig:slug,dept:"Group Communications",country:"Qatar",joinedAt:Date.parse("2026-06-01T08:00:00Z"),predictions:preds,champ:"Brazil"};
++    lsSet("wc:player:"+slug,JSON.stringify(me));
++    lsSet("wc:me",JSON.stringify(slug));
++    lsSet("wc:pin","1234");
++    try{localStorage.removeItem("wc:revealed");}catch(e){}
++    lsSet("wc:ydSeen",JSON.stringify({pts:2,rank:12,t:Date.now()-864e5}));
++    var slugs=Object.keys(localStorage).filter(function(k){return k.indexOf("wc:player:")===0;}).map(function(k){return k.slice(10);});
++    var ranks={},rk=1;slugs.forEach(function(s){if(s===slug)return;ranks[s]=rk;rk++;if(rk===12)rk++;});ranks[slug]=12;
++    lsSet("wc:ranksnap",JSON.stringify({ranks:ranks,t:Date.now()-12*36e5}));
++    lsSet("wc:demoYD","1");
++    return true;
++  }catch(e){return false;}
++}
+ (async function init(){
+   await seedSandbox();
+   state.results=await getJSON("wc:results",true)||{};
++  try{demoSeedYourDay();}catch(e){}
+   state.kteams=await getJSON("wc:kteams",true)||{};
+   state.org=false; /* org actions are server-verified per call — unlock fresh each load */
+   const me=await getJSON("wc:me",false);
+@@ -3623,7 +3871,10 @@ async function seedSandbox(){
+     document.getElementById("countdown").style.display="flex";
+     const h=(location.hash||"").slice(1);
+     updateChip();go(["matches","leaderboard","me"].indexOf(h)>=0?h:"matches");
+-    if(!openReveal())welcomeDelta();
++    buildYourDay();
++    openReveal();
++    try{setOfflineUI(false);if(hasOutbox())replayOutbox();}catch(e){}
++    setTimeout(function(){try{maybeInstallCoach();}catch(e){}},2500);
+   }else{go("join");}
+   renderPulse();setInterval(renderPulse,30000);
+   fetchLive();setInterval(liveTick,60000);
