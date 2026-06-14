@@ -647,6 +647,18 @@
   .savestate{margin-top:9px;font-size:11.5px;font-weight:700;border-radius:10px;padding:7px 11px;line-height:1.35}
   .savestate.off{color:#ffd27a;background:rgba(239,179,64,.12);border:1px solid rgba(239,179,64,.3)}
   .savestate.pending{color:var(--muted);background:var(--glass);border:1px solid var(--line)}
+  /* ===== UX wave 8: read-only office stat sprinkles ===== */
+  .office-pulse{background:linear-gradient(100deg,rgba(180,151,89,.12),rgba(255,255,255,.04));border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:0 0 14px;animation:rise .5s both}
+  .office-pulse .op-h{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-weight:800;margin-bottom:8px}
+  .office-pulse .op-row{display:flex;flex-wrap:wrap;gap:7px 14px;font-size:12.5px;color:var(--muted);font-weight:700}
+  .office-pulse .op-row.op-enrich{margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
+  .office-pulse .op-i b{color:var(--cream);font-weight:800}
+  .office-pulse .op-i .fl-img{width:15px;height:11px;border-radius:2px;vertical-align:-1px}
+  .office-fact{text-align:center;font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.2px;background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:0 0 12px;min-height:18px;opacity:0;transition:opacity .25s ease}
+  .office-fact.on{opacity:1}
+  .office-fact b{color:var(--gold)}
+  .office-fact .fl-img{width:15px;height:11px;border-radius:2px;vertical-align:-1px}
+  .champ-soc .cs-you{color:var(--gold-bright);font-weight:800}
 </style>
 </head>
 <body>
@@ -755,6 +767,7 @@
   <section class="view" id="view-matches">
     <div class="sec-title"><h2>Matches</h2><div class="tag" id="match-tag">104 fixtures</div></div>
     <div id="yourday" class="yourday" style="display:none"></div>
+    <div id="office-fact" class="office-fact" style="display:none"></div>
     <div id="pulsebar" class="pulsebar" style="display:none" onclick="location.href='watch.html'" title="Where to watch" role="link"></div>
     <div id="daybanner" class="daybanner" style="display:none"></div>
     <div id="daily-hub"></div>
@@ -1601,6 +1614,7 @@ function renderMatches(){
   if(!state.player)return;
   renderChampCard();
   try{renderYourDay();}catch(e){}
+  try{renderOfficeFact();}catch(e){}
   try{renderDailyHub();}catch(e){}
   const c=predCount(),tot=predTotal();
   document.getElementById("pred-count").textContent=c;
@@ -1963,7 +1977,7 @@ async function renderLeaderboard(){
   }
   if(!rows.length){body.innerHTML='<div class="empty"><div class="ic">🏆</div><b>No predictions yet</b><span>Be the first to lock in your picks under “Matches”.</span></div>';return;}
   const PT=predTotal();
-  let html="";
+  let html=officePulseHTML(rows);
   if(rows.length>=3){
     const ord=[rows[1],rows[0],rows[2]],cls=["second","first","third"],med=["🥈","🥇","🥉"];
     html+='<div class="podium">';
@@ -1984,6 +1998,7 @@ async function renderLeaderboard(){
     LB_PREV[r.slug]=r.pts;
   });
   startLbTicker(rows);
+  enrichOfficePulse(rows);
 }
 
 /* ===== fun-stat ticker (leaderboard) =====
@@ -2062,6 +2077,10 @@ async function renderMe(){
     if(ts&&scm[ts]>=3)fun.push('\ud83d\udd8a Signature scoreline: <b>'+ts.replace("-","\u2013")+'</b> \u00b7 picked \u00d7'+scm[ts]);
     let tt=null;for(const k in tm)if(!tt||tm[k]>tm[tt])tt=k;
     if(tt&&tm[tt]>=3)fun.push('\u2764\ufe0f Most-backed team: <b>'+(FL[tt]?flagTag(FL[tt])+' ':'')+esc(tt)+'</b> \u00d7'+tm[tt]);
+    /* wave 8 nuggets \u2014 own data only, safe to show pre-lock */
+    if(myRank!=="\u2014"&&s.scored>0&&total>=10){const pctl=Math.max(1,Math.round(myRank/total*100));
+      if(pctl<=50)fun.push('\ud83d\udcc8 You\u2019re in the <b>top '+pctl+'%</b> of the office');}
+    const bd8=bestDay();if(bd8)fun.push('\ud83d\ude80 Your best day: <b>+'+bd8.pts+' pts</b> on '+esc(bd8.label));
   }catch(e){}
   const awaiting=s.scored===0;
   document.getElementById("mecard").innerHTML=
@@ -2093,6 +2112,7 @@ async function renderMe(){
       adds.push('\ud83d\udcca Your hit rate: <b>'+me2+'%</b> \u00b7 office average '+op+'%');}
     if(c.twin&&c.twin.n>=5&&c.twin.slug&&c.twin.slug!==state.meSlug)
       adds.push('\ud83e\udd1d Pick twin: <b>'+esc(c.twin.name)+'</b> \u2014 '+c.twin.n+' shared picks');
+    try{const rare=rarestCorrect(c);if(rare)adds.push('\ud83c\udfaf Rarest call you nailed: <b>'+rare.label+'</b> \u2014 only '+rare.pc+'% of the office got it');}catch(e){}
     if(!adds.length)return;
     f.dataset.agree="1";f.insertAdjacentHTML("beforeend",adds.map(function(t){return '<div>'+t+'</div>';}).join(""));f.style.display="";
   }).catch(function(){});
@@ -2920,14 +2940,112 @@ async function fillConsensus(){
     if(h){n.innerHTML=h;n.style.display="block";}
   });
   if(soc&&CONS.champN>=10){
+    const mine=(state.player&&state.player.champ)||"";
     if(locked(CHAMP_LOCK)&&CONS.champMap){
-      const e=Object.keys(CONS.champMap).map(function(k){return [k,CONS.champMap[k]];})
-        .sort(function(a,b){return b[1]-a[1];}).slice(0,3);
-      soc.innerHTML='\ud83c\udfc6 Office champions: '+e.map(function(x){
+      /* champion picks are locked \u2192 safe to reveal the race */
+      const sorted=Object.keys(CONS.champMap).map(function(k){return [k,CONS.champMap[k]];})
+        .sort(function(a,b){return b[1]-a[1];});
+      let html='\ud83c\udfc6 Office champions: '+sorted.slice(0,3).map(function(x){
         return (FL[x[0]]?flagTag(FL[x[0]])+' ':'')+esc(x[0])+' '+Math.round(x[1]/CONS.champN*100)+'%';
       }).join(' \u00b7 ');
-    }else{soc.textContent="\ud83c\udfc6 "+CONS.champN+" colleagues have locked their champion";}
+      if(mine&&CONS.champMap[mine]){
+        const mn=CONS.champMap[mine],mpc=Math.round(mn/CONS.champN*100);let rk=1;
+        sorted.forEach(function(x){if(x[1]>mn)rk++;});
+        html+='<br><span class="cs-you">Your pick: '+(FL[mine]?flagTag(FL[mine])+' ':'')+esc(mine)+' \u2014 '+mpc+'% back it'+
+          (rk===1?' (office favourite)':(mn===1?' \u00b7 you\u2019re the only one':' \u00b7 #'+rk+' most-backed'))+'</span>';
+      }
+      soc.innerHTML=html;
+    }else{
+      /* pre-lock: no distribution (anti-herding) \u2014 only count + personal framing */
+      soc.innerHTML="\ud83c\udfc6 "+CONS.champN+" colleagues have locked their champion"+(mine?' \u00b7 <span class="cs-you">you\u2019re in</span>':"");
+    }
   }
+}
+
+/* ===== UX wave 8: read-only office stat sprinkles (no mechanics; locked-only, anti-herding) ===== */
+/* office split for a single LOCKED match — null until >=8 colleagues called it */
+function lockedSplit(m){
+  if(!CONS.map)return null;const c=CONS.map[m.id];if(!c)return null;
+  if(m.kn){const mv=fxView(m);const hN=c.w[mv.home.n]||0,aN=c.w[mv.away.n]||0,tot=hN+aN;if(tot<8)return null;
+    const arr=[[mv.home.n+" to win",hN,FL[mv.home.n]],[mv.away.n+" to win",aN,FL[mv.away.n]]].sort(function(a,b){return b[1]-a[1];});
+    return {tot:tot,topPc:Math.round(arr[0][1]/tot*100),topLabel:arr[0][0],topFl:arr[0][2]};}
+  const tot=c.H+c.D+c.A;if(tot<8)return null;
+  const g=[[m.home.n+" win",c.H,FL[m.home.n]],["a draw",c.D,null],[m.away.n+" win",c.A,FL[m.away.n]]].sort(function(a,b){return b[1]-a[1];});
+  return {tot:tot,topPc:Math.round(g[0][1]/tot*100),topLabel:g[0][0],topFl:g[0][2]};
+}
+/* the most one-sided ("hot") and most evenly-split ("divisive") LOCKED matches so far */
+function consExtremes(){
+  let hot=null,div=null;
+  FIXTURES.forEach(function(m){if(!lockedM(m))return;const s=lockedSplit(m);if(!s)return;const mv=fxView(m);
+    if(!hot||s.topPc>hot.topPc)hot={topPc:s.topPc,topLabel:s.topLabel,topFl:s.topFl,m:m,mv:mv};
+    if(!div||s.topPc<div.topPc)div={topPc:s.topPc,m:m,mv:mv};});
+  return {hot:hot,div:div};
+}
+/* Office Pulse strip (leaderboard) — synchronous vitals straight from the standings rows */
+function officePulseHTML(rows){
+  if(state.demo||!rows||rows.length<3)return "";
+  let picks=0,sum=0;rows.forEach(function(r){picks+=(r.predicted|0);sum+=(r.pts|0);});
+  const avg=Math.round(sum/rows.length);
+  const items=['<span class="op-i"><b>'+rows.length+'</b> playing</span>',
+    '<span class="op-i"><b>'+picks.toLocaleString()+'</b> picks locked</span>',
+    '<span class="op-i"><b>'+avg+'</b> avg pts</span>'];
+  return '<div class="office-pulse"><div class="op-h">🌍 Office pulse</div>'+
+    '<div class="op-row">'+items.join('')+'</div>'+
+    '<div class="op-row op-enrich" id="op-enrich" style="display:none"></div></div>';
+}
+/* async enrich: champion uptake + hottest banker (needs the consensus pull) */
+function enrichOfficePulse(rows){
+  if(state.demo||!(CONFIGURED||LOCAL_BACKEND))return;
+  consensus().then(function(c){
+    const el=document.getElementById("op-enrich");if(!el||!c)return;const bits=[];
+    if(c.n>=1&&c.champN>=1)bits.push('<span class="op-i"><b>'+Math.round(c.champN/c.n*100)+'%</b> chose a champion</span>');
+    const ex=consExtremes();
+    if(ex.hot&&ex.hot.topPc>=60)bits.push('<span class="op-i">🔥 Hottest: <b>'+(ex.hot.topFl?flagTag(ex.hot.topFl)+' ':'')+esc(ex.hot.topLabel)+'</b> '+ex.hot.topPc+'%</span>');
+    if(!bits.length)return;el.innerHTML=bits.join('');el.style.display="";
+  }).catch(function(){});
+}
+/* Rotating office fact (top of Matches) — match-centric trivia, locked-only */
+let OFACT_T=null;
+function renderOfficeFact(){
+  const el=document.getElementById("office-fact");if(!el)return;
+  if(state.demo||!(CONFIGURED||LOCAL_BACKEND)){el.style.display="none";return;}
+  consensus().then(function(c){
+    if(!c||!c.map)return;const facts=[];const ex=consExtremes();
+    if(ex.div&&ex.div.topPc<=50)facts.push('💡 Most divisive call so far: <b>'+esc(ex.div.mv.home.n)+' v '+esc(ex.div.mv.away.n)+'</b> — the office split right down the middle');
+    if(ex.hot&&ex.hot.topPc>=70)facts.push('🔥 Office banker: <b>'+(ex.hot.topFl?flagTag(ex.hot.topFl)+' ':'')+esc(ex.hot.topLabel)+'</b> — '+ex.hot.topPc+'% agreed');
+    if(c.best&&c.best.streak>=3)facts.push('🔥 Longest active streak: <b>'+esc((c.best.name||"").split(" ")[0])+'</b> — '+c.best.streak+' in a row');
+    if(c.bestUpset&&c.bestUpset.n>=2)facts.push('🗡 Biggest upset hunter: <b>'+esc((c.bestUpset.name||"").split(" ")[0])+'</b> — '+c.bestUpset.n+' shocks called');
+    let bestDayHit=null;if(c.dayHit)for(const k in c.dayHit){const d=c.dayHit[k];if(d.tot>=10){const r=d.hit/d.tot;if(!bestDayHit||r>bestDayHit.r)bestDayHit={k:k,r:r};}}
+    if(bestDayHit)facts.push('📊 Office’s sharpest day: <b>'+Math.round(bestDayHit.r*100)+'%</b> of calls right on '+esc(fmtWk(bestDayHit.k+"T12:00:00Z")));
+    if(!facts.length){el.style.display="none";return;}
+    clearInterval(OFACT_T);let i=0;
+    const show=function(){if(!document.body.contains(el)){clearInterval(OFACT_T);return;}el.classList.remove("on");
+      setTimeout(function(){el.innerHTML=facts[i%facts.length];el.classList.add("on");i++;},250);};
+    el.style.display="block";show();
+    OFACT_T=setInterval(function(){if(facts.length>1)show();},7000);
+  }).catch(function(){});
+}
+/* my rarest correct call: the settled result I got right that the fewest colleagues did */
+function rarestCorrect(c){
+  if(!c||!c.map||!state.player)return null;let best=null;
+  FIXTURES.forEach(function(m){const r=state.results[m.id];if(!r)return;if(m.kn?r.w==null:r.h==null)return;
+    const q=state.player.predictions[m.id]||{};const v=rvVerdict(m,q,r);if(v.pts<3)return;
+    const cc=c.map[m.id];if(!cc)return;const mv=fxView(m);let pc,label;
+    if(m.kn){let tot=0;for(const k in cc.w)tot+=cc.w[k];if(tot<8)return;pc=Math.round((cc.w[r.w]||0)/tot*100);label=esc(r.w)+" through";}
+    else{const tot=cc.H+cc.D+cc.A;if(tot<8)return;const ro=r.h>r.a?"H":r.h<r.a?"A":"D";pc=Math.round(cc[ro]/tot*100);
+      label=ro==="D"?(esc(mv.home.n)+" v "+esc(mv.away.n)+" draw"):((ro==="H"?esc(mv.home.n):esc(mv.away.n))+" beat "+(ro==="H"?esc(mv.away.n):esc(mv.home.n)));}
+    if(best===null||pc<best.pc)best={pc:pc,label:label};});
+  return (best&&best.pc<=40)?best:null;
+}
+/* my best single matchday by points earned (own picks only — safe pre-lock) */
+function bestDay(){
+  if(!state.player)return null;const byDay={};
+  FIXTURES.forEach(function(m){const r=state.results[m.id];if(!r)return;if(m.kn?r.w==null:r.h==null)return;
+    const q=state.player.predictions[m.id]||{};if(m.kn?!q.w:!q.o)return;
+    const pts=rvVerdict(m,q,r).pts;if(!pts)return;const k=dayKey(m.ko);byDay[k]=(byDay[k]||0)+pts;});
+  let bk=null;for(const k in byDay){if(!bk||byDay[k]>byDay[bk])bk=k;}
+  if(!bk||byDay[bk]<5)return null;
+  return {pts:byDay[bk],label:fmtWk(bk+"T12:00:00Z")};
 }
 
 /* ===== how it works · FAQ ===== */
